@@ -6,8 +6,9 @@ from core.tipping_element import cusp
 from core.coupling import linear_coupling
 
 # Test linear coupling
-tc1 = cusp(0.5,1)
-tc2 = cusp(0.5,1)
+tc1 = cusp(0,0.5,1)
+tc2 = cusp(1,0.5,1)
+print [tc1.id, tc2.id]
 cpl = linear_coupling(0.1,tc1)
 print cpl.coupling()
 tc2.add_cpl(cpl)
