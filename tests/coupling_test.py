@@ -2,12 +2,14 @@
 import sys
 sys.path.append('../modules')
 
-from core.tipping_element import tipping_element
+from core.tipping_element import cusp
 from core.coupling import linear_coupling
 
 # Test linear coupling
-te = tipping_element()
-cpl = linear_coupling(0.1,te)
+tc1 = cusp(0.5,1)
+tc2 = cusp(0.5,1)
+cpl = linear_coupling(0.1,tc1)
 print cpl.coupling()
-
-
+tc2.add_cpl(cpl)
+tc2.iterate(1.5)
+print tc2.x
