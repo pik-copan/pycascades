@@ -9,7 +9,7 @@ te = tipping_element()
 print te.iterate(1.5)
 
 # Test cusp class
-tc = cusp(0.5,1)
+tc = cusp(1,0.5)
 print tc.x
 print tc.a
 tc.iterate(1.5)
