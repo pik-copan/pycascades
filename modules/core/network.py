@@ -6,7 +6,19 @@ class network:
     def add_element(self,tip_element):
         self.tip_list.append(tip_element)
         
-    def plot_net(self):
+    def system(self,x,t):
+        df = []
+        for tip_element in self.tip_list:
+            df.append(tip_element.f_prime(x[tip_element.id]))
+        return df
+            
+    def get_state(self):
+        state_vec = []
+        for tip_element in self.tip_list:
+            state_vec.append(tip_element.x)
+        return state_vec
+        
+    def get_structure(self):
         ret_string = ""
         for tip_element in self.tip_list:
             ret_string = ret_string + str(tip_element.id) + "\n"
@@ -15,15 +27,3 @@ class network:
                           + " --> " + str(tip_element.id)
 				        + "\n")
         return ret_string
-    
-    def system(self,x,t):
-        df = []
-        for tip_element in self.tip_list:
-            df.append(tip_element.f_prime())
-        return df
-            
-    def get_state(self):
-        state_vec = []
-        for tip_element in self.tip_list:
-            state_vec.append(tip_element.x)
-        return state_vec
