@@ -8,16 +8,16 @@ class tipping_element:
     def add_cpl(self,cpl):
         self.cpl_list.append(cpl)
         
-    def cpl_sum(self):
+    def cpl_sum(self,x):
         try: 
             self.cpl_list
         except AttributeError:
             return 0.0
         else:
             ret_sum = 0.0
-            for linear_coupling in self.cpl_list:
-                ret_sum = ret_sum + linear_coupling.coupling()
-        return ret_sum 
+            for cpl in self.cpl_list:
+                ret_sum = ret_sum + cpl.coupling(x[cpl.out.id])
+        return ret_sum
         
     def dxdt(self):
         print ("Warning: Either using abstract tipping_element class which"
@@ -25,7 +25,7 @@ class tipping_element:
         return 0.0
     
     def f_prime(self,x):
-        return ( self.dxdt(x) + self.cpl_sum() )
+        return ( self.dxdt(x[self.id]) + self.cpl_sum(x) )
     
     def update_state(self,x):
         self.x = x

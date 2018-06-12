@@ -9,7 +9,7 @@ class network:
     def system(self,x,t):
         df = []
         for tip_element in self.tip_list:
-            df.append(tip_element.f_prime(x[tip_element.id]))
+            df.append(tip_element.f_prime(x))
         return df
             
     def get_state(self):
