@@ -14,6 +14,7 @@ class tipping_element:
         self.id = id_number
         self.x = 0.0
         self.cpl_list = []
+        self.tipped = False
         
     def add_cpl(self,cpl):
         """Add coupling to another tipping element"""
@@ -47,7 +48,8 @@ class tipping_element:
         return ( self.dxdt(x[self.id]) + self.cpl_sum(x) )
     
     def update_state(self,x):
-        """Change state of the tipping element"""
+        """Change state of the tipping element. Override this method to 
+        include tipping status updates"""
         self.x = x
 
 class cusp(tipping_element):
@@ -62,3 +64,12 @@ class cusp(tipping_element):
     def dxdt(self,x):
         """Normal form of cusp"""
         return ( self.a*pow(x,3) + self.b*x + self.c )
+    
+    def update_state(self,x):
+        """Change state of the tipping element and check wether element 
+        is tipped. For a cusp-like tipping element that means the 
+        state variable has passed zero which ultimately divides 
+        the stable solutions for every point in parameter space."""
+        if (self.x > 0 and x<= 0) or (self.x <= 0 and x > 0):
+            self.tipped = not self.tipped
+        self.x = x

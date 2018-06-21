@@ -31,6 +31,18 @@ class network:
         for tip_element in self.tip_list:
             state_vec.append(tip_element.x)
         return state_vec
+    
+    def set_state(self,state_vec):
+        """Update state by providing a new state vector"""
+        for tip_element in self.tip_list:
+            tip_element.update_state(state_vec[tip_element.id])
+    
+    def get_tipped(self):
+        """Returns binary state vector of the network."""
+        tipped_vec = []
+        for tip_element in self.tip_list:
+            tipped_vec.append(tip_element.tipped)
+        return tipped_vec
         
     def get_structure(self):
         """Get some text information of the system structure.

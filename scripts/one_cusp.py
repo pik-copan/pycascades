@@ -13,6 +13,7 @@ from core.network import network
 
 tc0 = cusp(0,-1,1,0)
 tc0.update_state(-1)
+tc0.tipped = False
 net = network()
 net.add_element(tc0)
 print (net.get_structure())
@@ -34,10 +35,13 @@ for t in range(t_init,t_max,param_tstep):
     t_arr = np.linspace(t_begin, t_end
                         , num=round( ( t_end-t_begin ) / iter_tstep + 1 ) )
     x = odeint(net.system,x0,t_arr)
-    x0 = x[-1]
+    net.set_state(x[-1])
+    x0 = net.get_state()
+    
     t_cum.extend(t_arr)
     x_cum.extend(x)
     tc0.c = tc0.c + 0.005
+    print (tc0.tipped)
     
 plt.plot(t_cum,x_cum)
 plt.show()
