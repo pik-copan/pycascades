@@ -1,0 +1,2 @@
+modules/*/*.pyc
+modules/*/__pycache__
