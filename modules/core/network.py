@@ -46,7 +46,7 @@ class network:
         
     def get_structure(self):
         """Get some text information of the system structure.
-        !!!Method currently not working correctly!!!
+        !!!Function currently not working correctly!!!
         """
         ret_string = ""
         for tip_element in self.tip_list:
