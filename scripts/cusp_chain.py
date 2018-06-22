@@ -10,7 +10,7 @@ from gen.net_factory import net_factory
 from core.integrate import solver
 
 net_factory = net_factory()
-net = net_factory.create_one_cusp(-1,1,0,-1)
+net = net_factory.create_cusp_chain(5,-1,1,0,-1,0.34)
 print (net.get_structure())
 
 solver = solver(net)
