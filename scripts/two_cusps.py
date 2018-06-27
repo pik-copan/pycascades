@@ -16,11 +16,11 @@ from core.network import network
 tc0 = cusp(0,-1,1,0)
 tc0.update_state(-1)
 tc1 = cusp(1,-1,1,0)
-tc1.update_state(1)
-c1 = linear_coupling(-0.37,tc0)
-c2 = linear_coupling(0.37,tc1)
+tc1.update_state(-1)
+#c1 = linear_coupling(-0.37,tc0)
+c2 = linear_coupling(0.4,tc1)
 tc0.add_cpl(c2)
-tc1.add_cpl(c1)
+#tc1.add_cpl(c1)
 net = network()
 net.add_element(tc0)
 net.add_element(tc1)
@@ -33,7 +33,7 @@ x0 = net.get_state()
 iter_tstep = 0.01
 param_tstep = 10
 t_init = 0
-t_max = 200
+t_max = 2000
 
 t_cum = []
 x_cum = []
@@ -47,7 +47,7 @@ for t in range(t_init,t_max,param_tstep):
     x0 = x[-1]
     t_cum.extend(t_arr)
     x_cum.extend(x)
-    tc0.c = tc0.c + 0.002
+    tc0.c = tc0.c + 0.005
     
 plt.plot(t_cum,x_cum)
 plt.show()

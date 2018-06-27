@@ -11,12 +11,11 @@ from core.integrate import solver
 
 net_factory = net_factory()
 net = net_factory.create_cusp_chain(5,-1,1,0,-1,0.34)
-print (net.get_structure())
 
 solver = solver(net)
 
 # initialize time
-solver.iterate(net.tip_list[0],1000,0.01,0.001)
+solver.iterate(net.nodes[0]['data'],1000,0.01,0.001)
 
 plt.figure(1)
 plt.subplot(211)
