@@ -21,7 +21,6 @@ class solver():
         self.net.set_state(x[-1])
         self.states.append(self.net.get_state())
         self.times.append(t_end)
-        print(self.net.get_tipped())
         
     def iterate(self,te,end,step,dpdt,opt='time'):
         """Iterate system while changing control parameter. The Control 

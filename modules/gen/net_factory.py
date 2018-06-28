@@ -26,9 +26,10 @@ class net_factory():
             net.add_node(id,data=tc)
 
         for id in range(1,number):
-            cpl = linear_coupling(cpl_strength,net.nodes[id-1]['data'])
-            net.node[id]['data'].add_cpl(cpl)
-            net.add_edge(id-1,id,weigth=cpl_strength)
+            cpl = linear_coupling(net.nodes[id-1]['data']
+                                 ,net.nodes[id-1]['data']
+                                 ,cpl_strength)
             
-            
+            net.add_edge(id-1,id,weight=cpl_strength,data=cpl)
+                        
         return net

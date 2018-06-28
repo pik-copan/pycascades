@@ -16,22 +16,6 @@ class tipping_element:
         self.cpl_list = []
         self.tipped = False
         
-    def add_cpl(self,cpl):
-        """Add coupling to another tipping element"""
-        self.cpl_list.append(cpl)
-        
-    def cpl_sum(self,x):
-        """Calculate the sum of the couplings"""
-        try: 
-            self.cpl_list
-        except AttributeError:
-            return 0.0
-        else:
-            ret_sum = 0.0
-            for cpl in self.cpl_list:
-                ret_sum = ret_sum + cpl.coupling(x[cpl.out.id])
-        return ret_sum
-        
     def dxdt(self):
         """Calculate dx/dt of tipping element. This method should be
         overwritten from the concrete tipping_element classes to implement
@@ -40,12 +24,6 @@ class tipping_element:
         print ("Warning: Either using abstract tipping_element class which"
                  + "is not suggested or forgot to override dxdt() function")
         return 0.0
-    
-    def f_prime(self,x):
-        """Functional form of dx/dt with couplings included. Provides an 
-        interface for ode solvers
-        """
-        return ( self.dxdt(x[self.id]) + self.cpl_sum(x) )
     
     def update_state(self,x):
         """Change state of the tipping element. Override this method to 

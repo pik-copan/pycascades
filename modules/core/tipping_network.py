@@ -1,3 +1,5 @@
+import networkx as nx
+import numpy as np
 from networkx import DiGraph
 
 class tipping_network(DiGraph):
@@ -29,6 +31,9 @@ class tipping_network(DiGraph):
         in one vector for common ODE-Solvers.
         """
         df = []
+        cpl_vec = np.matrix(x)*nx.adjacency_matrix(self,nodelist=None
+                                                   ,weight='weight').todense()
         for id in self.nodes():
-            df.append(self.node[id]['data'].f_prime(x))
+            f_prime = self.node[id]['data'].dxdt(x[id]) + cpl_vec[0,id]
+            df.append(f_prime)
         return df
