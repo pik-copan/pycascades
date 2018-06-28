@@ -10,12 +10,13 @@ class solver():
     def __init__(self,network):
         """Constructor"""
         self.net = network
+            
+    def _iterate(self,t_end,t_step):
+        """Private iterate method for constant parameter"""
         self.states = [self.net.get_state()]
         self.times = [0]
         self.pars = []
-    
-    def _iterate(self,t_end,t_step):
-        """Private iterate method for constant parameter"""
+        
         t_arr = np.arange(self.times[-1],t_end,t_step)
         x = odeint(self.net.system,self.states[-1],t_arr)
         self.net.set_state(x[-1])
@@ -28,6 +29,9 @@ class solver():
         to the system, e.g. dpdt (dpar/dt) should be much smaller than one. 
         Step size and break condition can be provided as time or 
         parameter values (opt='par'). Time values are the default behaviour"""
+        self.states = [self.net.get_state()]
+        self.times = [0]
+        self.pars = []
         
         if opt == 'par':
             par_step = step

@@ -3,52 +3,30 @@ import sys
 sys.path.append('../modules')
 
 # global imports
-from scipy.integrate import odeint
-import numpy as np
 import matplotlib.pyplot as plt
+import networkx as nx
 
 # private imports
-from core.coupling import linear_coupling
-from core.tipping_element import cusp
-from core.network import network
+from gen.net_factory import net_factory
+from core.integrate import solver
 
-# create network
-tc0 = cusp(0,-1,1,0)
-tc0.update_state(-1)
-tc1 = cusp(1,-1,1,0)
-tc1.update_state(-1)
-#c1 = linear_coupling(-0.37,tc0)
-c2 = linear_coupling(0.4,tc1)
-tc0.add_cpl(c2)
-#tc1.add_cpl(c1)
-net = network()
-net.add_element(tc0)
-net.add_element(tc1)
-print (net.get_structure())
+net_factory = net_factory()
+net = net_factory.create_oscillator(-1,1,0,-1,0.5)
+pos=nx.spring_layout(net)
+nx.draw_networkx(net,pos)
+nx.draw_networkx_edge_labels(net,pos,edge_labels=nx.get_edge_attributes(net,'weight'))
+plt.show()
 
-# initialize state
-x0 = net.get_state()
+solver = solver(net)
 
 # initialize time
-iter_tstep = 0.01
-param_tstep = 10
-t_init = 0
-t_max = 2000
+solver.iterate(net.nodes[0]['data'],100,0.01,0.001)
 
-t_cum = []
-x_cum = []
+plt.figure(1)
+plt.subplot(211)
+plt.plot(solver.times,solver.states)
 
-for t in range(t_init,t_max,param_tstep):
-    t_begin = t
-    t_end = t + param_tstep
-    t_arr = np.linspace(t_begin, t_end
-                        , num=round( ( t_end-t_begin ) / iter_tstep + 1 ) )
-    x = odeint(net.system,x0,t_arr)
-    x0 = x[-1]
-    t_cum.extend(t_arr)
-    x_cum.extend(x)
-    tc0.c = tc0.c + 0.005
-    
-plt.plot(t_cum,x_cum)
+plt.subplot(212)
+plt.plot(solver.pars,solver.states)
 plt.show()
 
