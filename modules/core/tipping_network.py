@@ -1,6 +1,5 @@
 from networkx import DiGraph
 
-
 class tipping_network(DiGraph):
     def get_state(self):
         """Returns state vector of the network. Note that state denotes the
@@ -17,6 +16,13 @@ class tipping_network(DiGraph):
         """Update state by providing a new state vector"""
         for id in self.nodes():
             self.node[id]['data'].update_state(state_vec[id])
+            
+    def get_tipped(self):
+        """Returns binary state vector of the network."""
+        tipped_vec = []
+        for id in self.nodes():
+            tipped_vec.append(self.node[id]['data'].tipped)
+        return tipped_vec
     
     def system(self,x,t):
         """Interface that collects the dx/dt functions of the tipping elements
