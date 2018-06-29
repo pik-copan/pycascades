@@ -26,7 +26,7 @@ class tipping_network(DiGraph):
             tipped_vec.append(self.node[id]['data'].tipped)
         return tipped_vec
     
-    def system(self,x,t):
+    def f_prime(self,t,x):
         """Interface that collects the dx/dt functions of the tipping elements
         in one vector for common ODE-Solvers.
         """
