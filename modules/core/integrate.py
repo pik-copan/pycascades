@@ -1,5 +1,6 @@
 from scipy.integrate import ode
 import numpy as np
+import time
 
 """integrate module"""
 
@@ -56,6 +57,7 @@ class solver():
         r = ode(self.net.f_prime).set_integrator('vode', method='bdf')
         r.set_initial_value(self.net.get_state(),self.times[-1])
         break_flag = False
+        t0 = time.process_time()
         while r.successful() and not break_flag:
             r.integrate(r.t+t_step)
             self.net.set_state(r.y)
@@ -67,3 +69,7 @@ class solver():
             
             if fix_point.all():
                 break_flag = True
+            if realtime_break and (time.process_time() - t0) >= realtime_break:
+                raise Exception("No equilibrium found " \
+                                "in "+str(realtime_break)+" realtime seconds."\
+                                " Increase tolerance or breaktime.")

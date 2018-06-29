@@ -27,7 +27,7 @@ solver = solver(net)
 
 # initialize time
 t0 = time.process_time()
-solver.equilibrate(0.001,0.01)
+solver.equilibrate(0.001,0.01,0.3)
 t_iteration = time.process_time() - t0
 print(t_iteration)
 
