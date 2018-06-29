@@ -2,7 +2,11 @@ from core.tipping_element import cusp
 from core.coupling import linear_coupling
 from core.tipping_network import tipping_network
 
+"""net_factory module"""
+
 class net_factory():
+    """net_factory class that provides functions to generate user defined
+    networks from parameters"""
     def __init__(self):
         pass
     def create_one_cusp(self,a,b,c,initial_state):

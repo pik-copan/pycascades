@@ -13,18 +13,29 @@ class solver():
         self.net = network
         self.states = [self.net.get_state()]
         self.times = [0]
-        self.pars = []
+        par_list = []
+        for id in self.net.nodes():
+            par_list.append(self.net.node[id]['data'].c)
+        self.pars = [par_list]
         self.r = ode(self.net.f_prime
                      ,self.net.jac).set_integrator('vode', method='bdf')
         self.r.set_initial_value(self.net.get_state(),self.times[-1])
+        
+    def save_state(self):
+        self.net.set_state(self.r.y)
+        self.states.append(self.r.y)
+        self.times.append(self.r.t)
+        
+        par_list = []
+        for id in self.net.nodes():
+            par_list.append(self.net.node[id]['data'].c)
+        self.pars.append(par_list)
         
     def integrate(self,t_step,t_end):
         """Manually integrate to t_end"""
         while self.r.successful() and self.r.t<t_end:
             self.r.integrate(self.r.t+t_step)
-            self.net.set_state(self.r.y)
-            self.states.append(self.r.y)
-            self.times.append(self.r.t)
+            self.save_state()
             
     def tip(self,tip_id_list,tolerance,t_step,realtime_break=None):
         """Trigger tipping by increasing normal parameter 
@@ -50,9 +61,7 @@ class solver():
         t0 = time.process_time()
         while self.r.successful() and not break_flag:
             self.r.integrate(self.r.t+t_step)
-            self.net.set_state(self.r.y)
-            self.states.append(self.r.y)
-            self.times.append(self.r.t)
+            self.save_state()
             
             fix = np.less(np.abs(self.net.f_prime(self.r.t,self.r.y))
                          ,tolerance*np.ones((1

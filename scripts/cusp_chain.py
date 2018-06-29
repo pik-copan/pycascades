@@ -6,6 +6,7 @@ sys.path.append('../modules')
 import matplotlib.pyplot as plt
 import networkx as nx
 import time
+import numpy as np
 
 # private imports
 from gen.net_factory import net_factory
@@ -34,4 +35,4 @@ t_iteration = time.process_time() - t0
 print(t_iteration)
 
 plt.figure(1)
-plt.plot(solver.times,solver.states)
+plt.plot(np.array(solver.pars)[:,0],solver.states)
