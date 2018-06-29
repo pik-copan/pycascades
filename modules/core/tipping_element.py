@@ -16,13 +16,22 @@ class tipping_element:
         self.cpl_list = []
         self.tipped = False
         
-    def dxdt(self):
+    def dxdt(self,x):
         """Calculate dx/dt of tipping element. This method should be
         overwritten from the concrete tipping_element classes to implement
         the special form of the tipping element.
         """
         print ("Warning: Either using abstract tipping_element class which"
                  + "is not suggested or forgot to override dxdt() function")
+        return 0.0
+    
+    def jac(self,x):
+        """Calculate jacobian diagonal element of tipping element. 
+        This method should be overwritten from the concrete tipping_element
+        classes to implement the special form of the tipping element.
+        """
+        print ("Warning: Either using abstract tipping_element class which"
+                 + "is not suggested or forgot to override jac() function")
         return 0.0
     
     def update_state(self,x):
@@ -42,6 +51,10 @@ class cusp(tipping_element):
     def dxdt(self,x):
         """Normal form of cusp"""
         return ( self.a*pow(x,3) + self.b*x + self.c )
+    
+    def jac(self,x):
+        """Diagonal element for jacobian matrix"""
+        return ( 3*self.a*pow(x,2) + self.b )
     
     def update_state(self,x):
         """Change state of the tipping element and check wether element 

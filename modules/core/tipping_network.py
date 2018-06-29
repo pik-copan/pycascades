@@ -37,3 +37,12 @@ class tipping_network(DiGraph):
             f_prime = self.node[id]['data'].dxdt(x[id]) + cpl_vec[0,id]
             df.append(f_prime)
         return df
+    
+    def jac(self,t,x):
+        """Returns jacobian for iteration and 
+        stability checkups of fixed points."""
+        jac = nx.adjacency_matrix(self,nodelist=None
+                                                   ,weight='weight').todense()
+        for id in self.nodes():
+            jac[id,id] = self.node[id]['data'].jac(x[id])
+        return jac
