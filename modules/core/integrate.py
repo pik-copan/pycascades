@@ -18,7 +18,7 @@ class solver():
             par_list.append(self.net.node[id]['data'].c)
         self.pars = [par_list]
         self.r = ode(self.net.f_prime
-                     ,self.net.jac).set_integrator('vode', method='bdf')
+                     ,self.net.jac).set_integrator('vode', method='adams')
         self.r.set_initial_value(self.net.get_state(),self.times[-1])
         
     def save_state(self):
@@ -42,7 +42,13 @@ class solver():
         of the elements with id from tip_id_list"""
         continue_flag = True
         while continue_flag:
-            self.equilibrate(tolerance,t_step,realtime_break)
+            try:
+                self.equilibrate(tolerance,t_step,realtime_break)
+            except NoEquilibrium:
+                print("No equilibrium found " \
+                      "in "+str(realtime_break)+" realtime seconds."\
+                      " Increase tolerance or breaktime.")
+                break
             for id in tip_id_list:
                 self.net.node[id]['data'].c+=0.01*t_step
             continue_flag=False
@@ -74,6 +80,11 @@ class solver():
                     break_flag = True
                     
             if realtime_break and (time.process_time() - t0) >= realtime_break:
-                raise Exception("No equilibrium found " \
-                                "in "+str(realtime_break)+" realtime seconds."\
-                                " Increase tolerance or breaktime.")
+                raise NoEquilibrium(
+                        "No equilibrium found " \
+                        "in "+str(realtime_break)+" realtime seconds."\
+                        " Increase tolerance or breaktime."
+                        )
+                
+class NoEquilibrium(Exception):
+    pass

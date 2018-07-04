@@ -20,13 +20,8 @@ plt.show()
 solver = solver(net)
 
 # initialize time
-solver.iterate(net.nodes[0]['data'],100,0.01,0.001)
+solver.integrate(0.1,50)
 
 plt.figure(1)
-plt.subplot(211)
 plt.plot(solver.times,solver.states)
-
-plt.subplot(212)
-plt.plot(solver.pars,solver.states)
-plt.show()
 

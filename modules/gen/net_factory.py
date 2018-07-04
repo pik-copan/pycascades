@@ -2,6 +2,10 @@ from core.tipping_element import cusp
 from core.coupling import linear_coupling
 from core.tipping_network import tipping_network
 
+from random import randint
+
+import networkx as nx
+
 """net_factory module"""
 
 class net_factory():
@@ -16,8 +20,9 @@ class net_factory():
         net.add_node(0,data=tc0)
         return net
 
-    def create_cusp_chain(self,number,a,b,c,initial_state,cpl_strength
-                          ,opt='uniform'):
+    def create_cusp_chain(
+            self,number,a,b,c,initial_state,cpl_strength,opt='uniform'
+            ):
         if opt == 'uniform':
             pass
         else:
@@ -57,4 +62,23 @@ class net_factory():
             net.add_edge(id-1,id,weight=cpl_strength,data=cpl1)
             net.add_edge(id,id-1,weight=-cpl_strength,data=cpl2)
                         
+        return net
+    
+    def create_erdos_renyi(
+            self,num,prob,a,b,c,initial_state,cpl_strength,seed=None
+            ):
+        net = nx.erdos_renyi_graph(num, prob,seed=seed,directed=True)
+        net.__class__ = tipping_network
+        tc = cusp
+        for id in net.nodes():
+            tc = cusp(id,a,b,c)
+            tc.update_state(initial_state)
+            net.node[id]['data'] = tc
+            
+        for id in net.edges():
+            if randint(0,1):
+                net.edges[id]['weight'] = cpl_strength
+            else:
+                net.edges[id]['weight'] = -cpl_strength
+            
         return net

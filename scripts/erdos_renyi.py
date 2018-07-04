@@ -6,18 +6,17 @@ sys.path.append('../modules')
 import matplotlib.pyplot as plt
 import networkx as nx
 import time
-import numpy as np
 
 # private imports
 from gen.net_factory import net_factory
 from core.integrate import solver
 
 net_factory = net_factory()
-net = net_factory.create_cusp_chain(5,-1,1,0,-0.003,0.338)
+net = net_factory.create_erdos_renyi(20,0.3,-1,1,0,-1,0.2,67)
 
 t0 = time.process_time()
-pos=nx.spring_layout(net)
-nx.draw(net,pos)
+pos=nx.random_layout(net)
+nx.draw(net,pos,with_labels=True)
 nx.draw_networkx_edge_labels(net,pos,edge_labels=nx.get_edge_attributes(net,'weight'))
 plt.show()
 
@@ -35,6 +34,5 @@ t_iteration = time.process_time() - t0
 print(t_iteration)
 
 plt.figure(1)
-plt.plot(np.array(solver.pars)[:,0],solver.states)
-plt.figure(2)
+#plt.plot(np.array(solver.pars)[:,0],solver.states)
 plt.plot(solver.times,solver.states)

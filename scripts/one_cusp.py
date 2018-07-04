@@ -17,7 +17,7 @@ nx.draw(net)
 solver = solver(net)
 
 # initialize time
-solver.iterate(net.node[0]['data'],1000,0.01,0.001)
+solver.tip([0],0.005,0.1,30)
 
 plt.figure(1)
 plt.subplot(211)
