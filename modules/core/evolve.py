@@ -2,10 +2,10 @@ from scipy.integrate import ode
 import numpy as np
 import time
 
-"""integrate module"""
+"""evolve module"""
 
-class solver():
-    """solver class
+class net_evolve():
+    """net_evolve class
     Provides methods to solve the system and vary system parameters.
     """
     def __init__(self,network):
@@ -40,6 +40,7 @@ class solver():
     def tip(self,tip_id_list,tolerance,t_step,realtime_break=None):
         """Trigger tipping by increasing normal parameter 
         of the elements with id from tip_id_list"""
+        self.net.adjust_normal_pars(0)
         continue_flag = True
         while continue_flag:
             try:

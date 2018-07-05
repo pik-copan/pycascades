@@ -79,6 +79,6 @@ class net_factory():
             if randint(0,1):
                 net.edges[id]['weight'] = cpl_strength
             else:
-                net.edges[id]['weight'] = -cpl_strength
+                net.edges[id]['weight'] = cpl_strength
             
         return net

@@ -10,10 +10,10 @@ import numpy as np
 
 # private imports
 from gen.net_factory import net_factory
-from core.integrate import solver
+from core.evolve import net_evolve
 
 net_factory = net_factory()
-net = net_factory.create_cusp_chain(5,-1,1,0,-0.003,0.338)
+net = net_factory.create_cusp_chain(5,-1,1,0,-1,0.1809)
 
 t0 = time.process_time()
 pos=nx.spring_layout(net)
@@ -24,17 +24,17 @@ plt.show()
 t_graph_draw = time.process_time() - t0
 print(t_graph_draw)
 
-solver = solver(net)
+net_evolve = net_evolve(net)
 
 # initialize time
 t0 = time.process_time()
-#solver.equilibrate(0.005,0.1,30)
-solver.tip([0],0.005,0.1,30)
-#solver.integrate(0.1,200)
+#net_evolve.equilibrate(0.005,0.1,30)
+net_evolve.tip([0],0.005,0.1,30)
+#net_evolve.integrate(0.1,200)
 t_iteration = time.process_time() - t0
 print(t_iteration)
 
 plt.figure(1)
-plt.plot(np.array(solver.pars)[:,0],solver.states)
-plt.figure(2)
-plt.plot(solver.times,solver.states)
+plt.plot(net_evolve.times,net_evolve.states)
+#plt.figure(2)
+#plt.plot(np.array(net_evolve.pars)[:,0],net_evolve.states)

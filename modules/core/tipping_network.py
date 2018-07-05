@@ -46,3 +46,13 @@ class tipping_network(DiGraph):
         for id in self.nodes():
             jac[id,id] = self.node[id]['data'].jac(x[id])
         return jac
+    
+    def adjust_normal_pars(self,c_eff):
+        """Adjust normal parameter so that the sum of coupling and
+        normal parameter (effective normal parameter) equals c_eff"""
+        cpl_vec = np.matrix(self.get_state())*nx.adjacency_matrix(
+                                                    self
+                                                    ,nodelist=None
+                                                    ,weight='weight').todense()
+        for id in self.nodes():
+            self.node[id]['data'].c = c_eff-cpl_vec[0,id]
