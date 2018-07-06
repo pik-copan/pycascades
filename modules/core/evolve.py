@@ -52,6 +52,7 @@ class net_evolve():
                 break
             for id in tip_id_list:
                 self.net.node[id]['data'].c+=0.01*t_step
+                print(self.net.node[id]['data'].c)
             continue_flag=False
             for id in tip_id_list:
                 if not self.net.node[id]['data'].tipped:
@@ -59,26 +60,16 @@ class net_evolve():
                        
     def equilibrate(self,tolerance,t_step,realtime_break=None):
         """Iterate system until it is in equilibrium. 
-        After every iteration it is checked wether the absolute value 
-        of all elements of f_prime is less than tolerance. 
-        If True the state can be considered as close to a fixed point 
-        and the eigenvalues of the jacobian are calculated to verify
-        the stability of the fixed point (all eigenvalues < 0 => stable)."""
-        break_flag = False
+        After every iteration it is checked if the system is in a stable
+        equilibrium"""
         t0 = time.process_time()
-        while self.r.successful() and not break_flag:
+        while self.r.successful():
             self.r.integrate(self.r.t+t_step)
             self.save_state()
             
-            fix = np.less(np.abs(self.net.f_prime(self.r.t,self.r.y))
-                         ,tolerance*np.ones((1
-                         ,self.net.number_of_nodes())))
-            
-            if fix.all():
-                val, vec = np.linalg.eig(self.net.jac(self.r.t,self.r.y))
-                stable = np.less(val,np.zeros((1,self.net.number_of_nodes())))
-                if stable.all():
-                    break_flag = True
+            if self.check_fixed_point(tolerance):
+                if self.check_stability():
+                    break
                     
             if realtime_break and (time.process_time() - t0) >= realtime_break:
                 raise NoEquilibrium(
@@ -86,6 +77,28 @@ class net_evolve():
                         "in "+str(realtime_break)+" realtime seconds."\
                         " Increase tolerance or breaktime."
                         )
+                
+    def check_fixed_point(self,tolerance):
+        """Check if the system is in an equilibrium state, e.g. if the 
+        absolute value of all elements of f_prime is less than tolerance. 
+        If True the state can be considered as close to a fixed point"""
+        fix = np.less(np.abs(self.net.f_prime(self.r.t,self.r.y))
+                         ,tolerance*np.ones((1
+                         ,self.net.number_of_nodes())))
+        if fix.all():
+            return True
+        else:
+            return False
+        
+    def check_stability(self):
+        """Check stability of current system state by calculating the 
+        eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
+        val, vec = np.linalg.eig(self.net.jac(self.r.t,self.r.y))
+        stable = np.less(val,np.zeros((1,self.net.number_of_nodes())))
+        if stable.all():
+            return True
+        else:
+            return False
                 
 class NoEquilibrium(Exception):
     pass
