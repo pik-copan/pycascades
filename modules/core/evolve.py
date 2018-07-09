@@ -1,4 +1,5 @@
 from scipy.integrate import ode
+from operator import xor
 import numpy as np
 import time
 
@@ -11,20 +12,23 @@ class net_evolve():
     def __init__(self,network):
         """Constructor"""
         self.net = network
-        self.states = [self.net.get_state()]
-        self.times = [0]
-        par_list = []
-        for id in self.net.nodes():
-            par_list.append(self.net.node[id]['data'].c)
-        self.pars = [par_list]
+        self.times = []
+        self.pars = []
+        self.states = []
+        self.tip_states = []
+        self.tipped_list = np.full(self.net.number_of_nodes(), False)
         self.r = ode(self.net.f_prime
                      ,self.net.jac).set_integrator('vode', method='adams')
-        self.r.set_initial_value(self.net.get_state(),self.times[-1])
+        self.r.set_initial_value(self.net.get_state(),0)
         
     def save_state(self):
+        """Save current state"""
+        self.times.append(self.r.t)
         self.net.set_state(self.r.y)
         self.states.append(self.r.y)
-        self.times.append(self.r.t)
+        self.tip_states.append(self.net.get_tip_state())
+        self.tipped_list = self.tipped_list | list(map(xor,self.tip_states[0]
+                                                  ,self.tip_states[-1]))
         
         par_list = []
         for id in self.net.nodes():
@@ -41,6 +45,12 @@ class net_evolve():
         """Trigger tipping by increasing normal parameter 
         of the elements with id from tip_id_list"""
         self.net.adjust_normal_pars(0)
+        self.save_state()
+        if not self.is_fixed_point(tolerance):
+            print("Warning: Initial state is not a fixed point of the system")
+        elif not self.is_stable():
+            print("Warning: Initial state is not a stable point of the system")
+            
         continue_flag = True
         while continue_flag:
             try:
@@ -50,13 +60,12 @@ class net_evolve():
                       "in "+str(realtime_break)+" realtime seconds."\
                       " Increase tolerance or breaktime.")
                 break
+            
             for id in tip_id_list:
                 self.net.node[id]['data'].c+=0.01*t_step
-                print(self.net.node[id]['data'].c)
-            continue_flag=False
-            for id in tip_id_list:
-                if not self.net.node[id]['data'].tipped:
-                    continue_flag=True
+            
+            if self.are_tipped(tip_id_list):
+                continue_flag=False
                        
     def equilibrate(self,tolerance,t_step,realtime_break=None):
         """Iterate system until it is in equilibrium. 
@@ -67,9 +76,8 @@ class net_evolve():
             self.r.integrate(self.r.t+t_step)
             self.save_state()
             
-            if self.check_fixed_point(tolerance):
-                if self.check_stability():
-                    break
+            if self.is_fixed_point(tolerance):
+                break
                     
             if realtime_break and (time.process_time() - t0) >= realtime_break:
                 raise NoEquilibrium(
@@ -78,7 +86,7 @@ class net_evolve():
                         " Increase tolerance or breaktime."
                         )
                 
-    def check_fixed_point(self,tolerance):
+    def is_fixed_point(self,tolerance):
         """Check if the system is in an equilibrium state, e.g. if the 
         absolute value of all elements of f_prime is less than tolerance. 
         If True the state can be considered as close to a fixed point"""
@@ -90,7 +98,7 @@ class net_evolve():
         else:
             return False
         
-    def check_stability(self):
+    def is_stable(self):
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
         val, vec = np.linalg.eig(self.net.jac(self.r.t,self.r.y))
@@ -99,6 +107,14 @@ class net_evolve():
             return True
         else:
             return False
+        
+    def are_tipped(self,tip_id_list):
+        """Check if tipping elements from tip_id_list have tipped"""
+        for id in tip_id_list:
+            if not self.tipped_list[id]:
+                return False
+        return True
+        
                 
 class NoEquilibrium(Exception):
     pass

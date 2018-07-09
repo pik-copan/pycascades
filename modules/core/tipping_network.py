@@ -19,12 +19,12 @@ class tipping_network(DiGraph):
         for id in self.nodes():
             self.node[id]['data'].update_state(state_vec[id])
             
-    def get_tipped(self):
+    def get_tip_state(self):
         """Returns binary state vector of the network."""
-        tipped_vec = []
+        tip_vec = []
         for id in self.nodes():
-            tipped_vec.append(self.node[id]['data'].tipped)
-        return tipped_vec
+            tip_vec.append(self.node[id]['data'].tipped)
+        return tip_vec
     
     def f_prime(self,t,x):
         """Interface that collects the dx/dt functions of the tipping elements

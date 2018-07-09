@@ -60,13 +60,14 @@ class net_factory():
                                   ,-cpl_strength)
             
             net.add_edge(id-1,id,weight=cpl_strength,data=cpl1)
-            net.add_edge(id,id-1,weight=-cpl_strength,data=cpl2)
+            net.add_edge(id,id-1,weight=cpl_strength,data=cpl2)
                         
         return net
     
     def create_erdos_renyi(
-            self,num,prob,a,b,c,initial_state,cpl_strength,seed=None
+            self,num,average_degree,a,b,c,initial_state,cpl_strength,seed=None
             ):
+        prob = average_degree/(num-1)
         net = nx.erdos_renyi_graph(num, prob,seed=seed,directed=True)
         net.__class__ = tipping_network
         tc = cusp
