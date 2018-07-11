@@ -62,5 +62,5 @@ class cusp(tipping_element):
         state variable has passed zero which ultimately divides 
         the stable solutions for every point in parameter space."""
         if (self.x > 0 and x <= 0) or (self.x <= 0 and x > 0):
-            self.tipped = True
+            self.tipped = not self.tipped
         self.x = x
