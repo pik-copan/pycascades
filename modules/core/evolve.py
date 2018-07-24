@@ -66,7 +66,7 @@ class net_evolve():
                 tipped_id_list[id] = xor(tipped_id_list[id]
                                      ,self.net.node[id]['data'].tipped)
                 
-        return self.fraction_tipped()
+        return self.number_tipped()
                        
     def equilibrate(self,tolerance,t_step,save,realtime_break=None):
         """Iterate system until it is in equilibrium. 
@@ -111,11 +111,11 @@ class net_evolve():
         else:
             return False
     
-    def fraction_tipped(self):
-        """Return fraction of tipped elements"""
-        N = len(max(nx.weakly_connected_components(self.net),key=len))
+    def number_tipped(self):
+        """Return number of tipped elements"""
+        #N = len(max(nx.weakly_connected_components(self.net),key=len))
         tip_list = list(map(xor,self.init_tip_state,self.net.get_tip_state()))
-        return sum(tip_list)/N
+        return sum(tip_list)
         
                 
 class NoEquilibrium(Exception):
