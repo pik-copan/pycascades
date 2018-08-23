@@ -12,7 +12,7 @@ from gen.net_factory import net_factory
 from core.evolve import net_evolve
 
 net_factory = net_factory()
-net = net_factory.create_erdos_renyi(100,3,-1,1,0,-1,2,67)
+net = net_factory.create_erdos_renyi(100,3,-1,1,0,-1,0.2,False,67)
 net_ev = net_evolve(net)
 
 t0 = time.process_time()

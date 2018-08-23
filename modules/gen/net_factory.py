@@ -65,7 +65,8 @@ class net_factory():
         return net
     
     def create_erdos_renyi(
-            self,num,average_degree,a,b,c,initial_state,cpl_strength,seed=None
+            self,num,average_degree,a,b,c,initial_state,cpl_strength,
+            negative_coupling=False,seed=None
             ):
         prob = average_degree/(num-1)
         net = nx.erdos_renyi_graph(num, prob,seed=seed,directed=True)
@@ -77,8 +78,11 @@ class net_factory():
             net.node[id]['data'] = tc
             
         for id in net.edges():
-            if randint(0,1):
-                net.edges[id]['weight'] = cpl_strength
+            if negative_coupling:
+                if randint(0,1):
+                    net.edges[id]['weight'] = cpl_strength
+                else:
+                    net.edges[id]['weight'] = -cpl_strength
             else:
                 net.edges[id]['weight'] = cpl_strength
             
