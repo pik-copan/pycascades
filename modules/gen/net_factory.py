@@ -43,7 +43,7 @@ class net_factory():
                         
         return net
     
-    def create_oscillator(self,a,b,c,initial_state,cpl_strength):
+    def create_two_cusps(self,a,b,c,initial_state,cpl_strength,negative_coupling=False):
         
         net = tipping_network()
         for id in range(0,2):
@@ -51,19 +51,72 @@ class net_factory():
             tc.update_state(initial_state)
             net.add_node(id,data=tc)
 
+        if negative_coupling:
+            m_cpl_strength = -cpl_strength
+        else:
+            m_cpl_strength = cpl_strength
+        
         for id in range(1,2):
             cpl1 = linear_coupling(net.nodes[id-1]['data']
                                   ,net.nodes[id]['data']
                                   ,cpl_strength)
             cpl2 = linear_coupling(net.nodes[id]['data']
                                   ,net.nodes[id-1]['data']
-                                  ,-cpl_strength)
+                                  ,m_cpl_strength)
             
             net.add_edge(id-1,id,weight=cpl_strength,data=cpl1)
-            net.add_edge(id,id-1,weight=cpl_strength,data=cpl2)
+            net.add_edge(id,id-1,weight=m_cpl_strength,data=cpl2)
                         
         return net
     
+    def create_butterfly(self,a,b,c,initial_state,cpl_strength):
+        net = tipping_network()
+        for id in range(0,3):
+            tc = cusp(id,a,b,c)
+            tc.update_state(initial_state)
+            net.add_node(id,data=tc)
+        
+        cpl1 = linear_coupling(net.nodes[0]['data']
+                                   ,net.nodes[1]['data']
+                                   ,cpl_strength)
+        cpl2 = linear_coupling(net.nodes[1]['data']
+                                   ,net.nodes[0]['data']
+                                   ,cpl_strength)
+        cpl3 = linear_coupling(net.nodes[0]['data']
+                                   ,net.nodes[2]['data']
+                                   ,cpl_strength)
+        cpl4 = linear_coupling(net.nodes[2]['data']
+                                   ,net.nodes[0]['data']
+                                   ,cpl_strength)
+        net.add_edge(0,1,weight=cpl_strength,data=cpl1)
+        net.add_edge(1,0,weight=cpl_strength,data=cpl2)
+        net.add_edge(0,2,weight=cpl_strength,data=cpl3)
+        net.add_edge(2,0,weight=cpl_strength,data=cpl4)
+        
+        return net
+    
+    def create_ring(self,number,a,b,c,initial_state,cpl_strength):
+        net = tipping_network()
+        for id in range(0,number):
+            tc = cusp(id,a,b,c)
+            tc.update_state(initial_state)
+            net.add_node(id,data=tc)
+        
+        for id in range(1,number):
+            cpl = linear_coupling(net.nodes[id-1]['data']
+                                 ,net.nodes[id]['data']
+                                 ,cpl_strength)
+        
+            net.add_edge(id-1,id,weight=cpl_strength,data=cpl)
+            
+        cpl = linear_coupling(net.nodes[number-1]['data']
+                                 ,net.nodes[0]['data']
+                                 ,cpl_strength)
+        
+        net.add_edge(number-1,0,weight=cpl_strength,data=cpl)
+        
+        return net
+        
     def create_erdos_renyi(
             self,num,average_degree,a,b,c,initial_state,cpl_strength,
             negative_coupling=False,seed=None

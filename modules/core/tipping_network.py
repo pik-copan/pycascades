@@ -56,3 +56,25 @@ class tipping_network(DiGraph):
                                                     ,weight='weight').todense()
         for id in self.nodes():
             self.node[id]['data'].c = c_eff-cpl_vec[0,id]
+            
+    def is_stable(self):
+        """Check stability of current system state by calculating the 
+        eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
+        val, vec = np.linalg.eig(self.jac(0,self.get_state()))
+        stable = np.less(val,np.zeros((1,self.number_of_nodes())))
+        if stable.all():
+            return True
+        else:
+            return False
+        
+    def is_fixed_point(self,tolerance):
+        """Check if the system is in an equilibrium state, e.g. if the 
+        absolute value of all elements of f_prime is less than tolerance. 
+        If True the state can be considered as close to a fixed point"""
+        fix = np.less(np.abs(self.f_prime(0,self.get_state()))
+                     ,tolerance*np.ones((1
+                     ,self.number_of_nodes())))
+        if fix.all():
+            return True
+        else:
+            return False

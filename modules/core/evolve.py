@@ -1,8 +1,8 @@
 from scipy.integrate import ode
-from operator import xor
 import numpy as np
-import networkx as nx
+from operator import xor
 import time
+from scipy.optimize import fsolve
 
 """evolve module"""
 
@@ -14,6 +14,7 @@ class net_evolve():
         """Constructor"""
         self.net = network
         self.init_tip_state = self.net.get_tip_state()
+        self.init_state = self.net.get_state()
         
         self.times = []
         self.pars = []
@@ -21,7 +22,7 @@ class net_evolve():
         
         self.r = ode(self.net.f_prime
                      ,self.net.jac).set_integrator('vode', method='adams')
-        self.r.set_initial_value(self.net.get_state(),0)
+        self.r.set_initial_value(self.init_state,0)
         
     def save_state(self):
         """Save current state"""
@@ -32,6 +33,18 @@ class net_evolve():
         for id in self.net.nodes():
             par_list.append(self.net.node[id]['data'].c)
         self.pars.append(par_list)
+        
+    def get_critical_par(self,tip_id,res=0.001):
+        self.net.adjust_normal_pars(0)
+        while self.net.is_stable():
+            self.net.node[tip_id]['data'].c+=res
+            x_new = fsolve(lambda x : self.net.f_prime(0,x),-np.ones(len(self.net.get_state())))
+            self.net.set_state(x_new)
+        
+        critical_par = self.net.node[tip_id]['data'].c
+        self.net.set_state(self.init_state)
+        self.net.adjust_normal_pars(0)
+        return critical_par
         
     def integrate(self,t_step,t_end):
         """Manually integrate to t_end"""
@@ -46,9 +59,9 @@ class net_evolve():
         self.net.set_state(self.r.y)
         if save:
             self.save_state()
-        if not self.is_fixed_point(tolerance):
+        if not self.net.is_fixed_point(tolerance):
             print("Warning: Initial state is not a fixed point of the system")
-        elif not self.is_stable():
+        elif not self.net.is_stable():
             print("Warning: Initial state is not a stable point of the system")
         
         tipped_id_list = np.full(len(tip_id_list), False)
@@ -79,7 +92,7 @@ class net_evolve():
             if save:
                 self.save_state()
             
-            if self.is_fixed_point(tolerance):
+            if self.net.is_fixed_point(tolerance):
                 break
                     
             if realtime_break and (time.process_time() - t0) >= realtime_break:
@@ -89,34 +102,11 @@ class net_evolve():
                         " Increase tolerance or breaktime."
                         )
                 
-    def is_fixed_point(self,tolerance):
-        """Check if the system is in an equilibrium state, e.g. if the 
-        absolute value of all elements of f_prime is less than tolerance. 
-        If True the state can be considered as close to a fixed point"""
-        fix = np.less(np.abs(self.net.f_prime(self.r.t,self.r.y))
-                         ,tolerance*np.ones((1
-                         ,self.net.number_of_nodes())))
-        if fix.all():
-            return True
-        else:
-            return False
-        
-    def is_stable(self):
-        """Check stability of current system state by calculating the 
-        eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
-        val, vec = np.linalg.eig(self.net.jac(self.r.t,self.r.y))
-        stable = np.less(val,np.zeros((1,self.net.number_of_nodes())))
-        if stable.all():
-            return True
-        else:
-            return False
-    
     def number_tipped(self):
         """Return number of tipped elements"""
         #N = len(max(nx.weakly_connected_components(self.net),key=len))
         tip_list = list(map(xor,self.init_tip_state,self.net.get_tip_state()))
         return sum(tip_list)
-        
                 
 class NoEquilibrium(Exception):
     pass

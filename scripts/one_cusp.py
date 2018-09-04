@@ -17,7 +17,7 @@ nx.draw(net)
 net_evolve = net_evolve(net)
 
 # initialize time
-net_evolve.tip([0],0.005,0.1,30)
+net_evolve.tip([0],0.005,0.1,30,save=True)
 
 plt.figure(1)
 plt.subplot(211)
