@@ -1,0 +1,6 @@
+cache
+modules/core/*.pyc
+modules/core/__pycache__
+modules/gen/*.pyc
+modules/gen/__pycache__
+scripts/*

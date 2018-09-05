@@ -36,6 +36,8 @@ class net_evolve():
         
     def get_critical_par(self,tip_id,res=0.001):
         self.net.adjust_normal_pars(0)
+        if not self.net.is_stable():
+            print("Initially unstable!")
         while self.net.is_stable():
             self.net.node[tip_id]['data'].c+=res
             x_new = fsolve(lambda x : self.net.f_prime(0,x),-np.ones(len(self.net.get_state())))

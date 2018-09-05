@@ -69,29 +69,31 @@ class net_factory():
                         
         return net
     
-    def create_butterfly(self,a,b,c,initial_state,cpl_strength):
+    def create_butterfly(self,wing_number,wing_size,a,b,c,initial_state,cpl_strength):
         net = tipping_network()
-        for id in range(0,3):
+        net_size = wing_number*(wing_size - 1) + 1
+        for id in range(0,net_size):
             tc = cusp(id,a,b,c)
             tc.update_state(initial_state)
             net.add_node(id,data=tc)
         
-        cpl1 = linear_coupling(net.nodes[0]['data']
-                                   ,net.nodes[1]['data']
-                                   ,cpl_strength)
-        cpl2 = linear_coupling(net.nodes[1]['data']
-                                   ,net.nodes[0]['data']
-                                   ,cpl_strength)
-        cpl3 = linear_coupling(net.nodes[0]['data']
-                                   ,net.nodes[2]['data']
-                                   ,cpl_strength)
-        cpl4 = linear_coupling(net.nodes[2]['data']
-                                   ,net.nodes[0]['data']
-                                   ,cpl_strength)
-        net.add_edge(0,1,weight=cpl_strength,data=cpl1)
-        net.add_edge(1,0,weight=cpl_strength,data=cpl2)
-        net.add_edge(0,2,weight=cpl_strength,data=cpl3)
-        net.add_edge(2,0,weight=cpl_strength,data=cpl4)
+        id = 1
+        for no in range(0,wing_number):
+            cpl = linear_coupling(net.nodes[0]['data']
+                                       ,net.nodes[id]['data']
+                                       ,cpl_strength)
+            net.add_edge(0,id,weight=cpl_strength,data=cpl)
+            for k in range(2,wing_size):
+                cpl = linear_coupling(net.nodes[id]['data']
+                                       ,net.nodes[id+1]['data']
+                                       ,cpl_strength)
+                net.add_edge(id,id+1,weight=cpl_strength,data=cpl)
+                id+=1
+            cpl = linear_coupling(net.nodes[id]['data']
+                                       ,net.nodes[0]['data']
+                                       ,cpl_strength)
+            net.add_edge(id,0,weight=cpl_strength,data=cpl)
+            id+=1
         
         return net
     
