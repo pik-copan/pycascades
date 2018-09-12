@@ -40,13 +40,16 @@ class net_evolve():
             print("Initially unstable!")
         while self.net.is_stable():
             self.net.node[tip_id]['data'].c+=res
-            x_new = fsolve(lambda x : self.net.f_prime(0,x),-np.ones(len(self.net.get_state())))
+            x_new = fsolve(lambda x : self.net.f_prime(0,x)
+                            ,-np.ones(len(self.net.get_state()))
+                            ,fprime = lambda x : self.net.jac(0,x) )
             self.net.set_state(x_new)
         
         critical_par = self.net.node[tip_id]['data'].c
+        x_crit = self.net.get_state()
         self.net.set_state(self.init_state)
         self.net.adjust_normal_pars(0)
-        return critical_par
+        return critical_par,x_crit
         
     def integrate(self,t_step,t_end):
         """Manually integrate to t_end"""
