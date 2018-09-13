@@ -142,3 +142,27 @@ class net_factory():
                 net.edges[id]['weight'] = cpl_strength
             
         return net
+    
+    def create_watts_strogatz(
+            self,num,average_degree,rewiring_probability,a,b,c,initial_state,
+            cpl_strength,tries=100,negative_coupling=False,seed=None
+            ):
+        net = nx.connected_watts_strogatz_graph(num,average_degree,rewiring_probability,
+                                                tries=tries, seed=seed)
+        net.__class__ = tipping_network
+        tc = cusp
+        for id in net.nodes():
+            tc = cusp(id,a,b,c)
+            tc.update_state(initial_state)
+            net.node[id]['data'] = tc
+            
+        for id in net.edges():
+            if negative_coupling:
+                if randint(0,1):
+                    net.edges[id]['weight'] = cpl_strength
+                else:
+                    net.edges[id]['weight'] = -cpl_strength
+            else:
+                net.edges[id]['weight'] = cpl_strength
+            
+        return net
