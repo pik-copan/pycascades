@@ -72,6 +72,16 @@ class evolve():
         else:
             return False
     
+    def is_stable(self):
+        """Check stability of current system state by calculating the 
+        eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
+        val, vec = np.linalg.eig(self.jac(0,self.r.y))
+        stable = np.less(val,np.zeros((1,len(self.pars[-1]))))
+        if stable.all():
+            return True
+        else:
+            return False
+    
 class net_evolve():
     """net_evolve class
     Provides methods to solve the system and vary system parameters.

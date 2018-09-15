@@ -43,7 +43,7 @@ class tipping_network(DiGraph):
 #            f_prime = self.node[id]['data'].dxdt(x[id]) + cpl_vec[0,id]
 #            df.append(f_prime)
 #        return df
-    
+
     def get_jac(self):
 #        adj = nx.adjacency_matrix(self,nodelist=None
 #                                 ,weight='weight').todense()
@@ -75,12 +75,4 @@ class tipping_network(DiGraph):
         for id in self.nodes():
             self.node[id]['data'].c = c_eff-cpl_vec[0,id]
             
-    def is_stable(self):
-        """Check stability of current system state by calculating the 
-        eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
-        val, vec = np.linalg.eig(self.jac(0,self.get_state()))
-        stable = np.less(val,np.zeros((1,self.number_of_nodes())))
-        if stable.all():
-            return True
-        else:
-            return False
+    
