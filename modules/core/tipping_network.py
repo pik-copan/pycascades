@@ -64,7 +64,7 @@ class tipping_network(DiGraph):
 #        for id in self.nodes():
 #            jac[id,id] = self.node[id]['data'].jac(x[id])
 #        return jac
-    
+            
     def adjust_normal_pars(self,c_eff):
         """Adjust normal parameter so that the sum of coupling and
         normal parameter (effective normal parameter) equals c_eff"""
@@ -81,18 +81,6 @@ class tipping_network(DiGraph):
         val, vec = np.linalg.eig(self.jac(0,self.get_state()))
         stable = np.less(val,np.zeros((1,self.number_of_nodes())))
         if stable.all():
-            return True
-        else:
-            return False
-        
-    def is_fixed_point(self,tolerance):
-        """Check if the system is in an equilibrium state, e.g. if the 
-        absolute value of all elements of f_prime is less than tolerance. 
-        If True the state can be considered as close to a fixed point"""
-        fix = np.less(np.abs(self.f_prime(0,self.get_state()))
-                     ,tolerance*np.ones((1
-                     ,self.number_of_nodes())))
-        if fix.all():
             return True
         else:
             return False

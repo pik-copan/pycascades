@@ -16,14 +16,14 @@ class evolve():
         # Initialize state
         self.r.set_initial_value(initial_state,0)
         self.times = []
-        self.pars = initial_pars
+        self.pars = [initial_pars]
         self.states = []
         self.save_state()
         
     def f(self,t,x):
         f = []
         for idx in range(0,len(x)):
-            dxdt = self.dxdt_vec[idx].__call__(self.pars[-1],x[idx])
+            dxdt = self.dxdt_vec[idx].__call__(self.pars[-1][idx],x[idx])
             f.append(dxdt)
         #print(f)
         return f
@@ -39,6 +39,38 @@ class evolve():
         self.times.append(self.r.t)
         self.states.append(self.r.y)
         self.pars.append(self.pars[-1])
+        
+    def equilibrate(self,tolerance,t_step,save,realtime_break=None):
+        """Iterate system until it is in equilibrium. 
+        After every iteration it is checked if the system is in a stable
+        equilibrium"""
+        t0 = time.process_time()
+        while self.r.successful():
+            self.r.integrate(self.r.t+t_step)
+            if save:
+                self.save_state()
+            
+            if self.is_fixed_point(tolerance):
+                break
+                    
+            if realtime_break and (time.process_time() - t0) >= realtime_break:
+                raise NoEquilibrium(
+                        "No equilibrium found " \
+                        "in "+str(realtime_break)+" realtime seconds."\
+                        " Increase tolerance or breaktime."
+                        )
+                
+    def is_fixed_point(self,tolerance):
+        """Check if the system is in an equilibrium state, e.g. if the 
+        absolute value of all elements of f_prime is less than tolerance. 
+        If True the state can be considered as close to a fixed point"""
+        fix = np.less(np.abs(self.f(0,self.r.y))
+                     ,tolerance*np.ones((1
+                     ,len(self.pars[-1]))))
+        if fix.all():
+            return True
+        else:
+            return False
     
 class net_evolve():
     """net_evolve class
@@ -103,27 +135,6 @@ class net_evolve():
                                      ,self.net.node[id]['data'].tipped)
                 
         return self.number_tipped()
-                       
-    def equilibrate(self,tolerance,t_step,save,realtime_break=None):
-        """Iterate system until it is in equilibrium. 
-        After every iteration it is checked if the system is in a stable
-        equilibrium"""
-        t0 = time.process_time()
-        while self.r.successful():
-            self.r.integrate(self.r.t+t_step)
-            self.net.set_state(self.r.y)
-            if save:
-                self.save_state()
-            
-            if self.net.is_fixed_point(tolerance):
-                break
-                    
-            if realtime_break and (time.process_time() - t0) >= realtime_break:
-                raise NoEquilibrium(
-                        "No equilibrium found " \
-                        "in "+str(realtime_break)+" realtime seconds."\
-                        " Increase tolerance or breaktime."
-                        )
                 
     def number_tipped(self):
         """Return number of tipped elements"""
