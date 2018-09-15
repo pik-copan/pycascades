@@ -7,9 +7,32 @@ from scipy.optimize import fsolve
 """evolve module"""
 
 class evolve():
-    def __init__(self,tipping_network):
+    def __init__(self,tipping_network,initial_state,initial_pars):
+        # Initialize solver
         self.dxdt_vec = tipping_network.get_dxdt_vec()
         self.jac = tipping_network.get_jac()
+        self.r = ode(self.f).set_integrator('vode', method='adams')
+        
+        # Initialize state
+        self.r.set_initial_value(initial_state,0)
+        self.times = []
+        self.pars = initial_pars
+        self.states = []
+        self.save_state()
+        
+    def f(t,x,self):
+        return [0,0,0,0,0]
+    
+    def integrate(self,t_step,t_end):
+        """Manually integrate to t_end"""
+        while self.r.successful() and self.r.t<t_end:
+            self.r.integrate(self.r.t+t_step)
+            self.save_state()
+            
+    def save_state(self):
+        """Save current state"""
+        self.times.append(self.r.t)
+        self.states.append(self.r.y)
     
 class net_evolve():
     """net_evolve class
@@ -55,12 +78,6 @@ class net_evolve():
         self.net.set_state(self.init_state)
         self.net.adjust_normal_pars(0)
         return critical_par,x_crit
-        
-    def integrate(self,t_step,t_end):
-        """Manually integrate to t_end"""
-        while self.r.successful() and self.r.t<t_end:
-            self.r.integrate(self.r.t+t_step)
-            self.save_state()
             
     def tip(self,tip_id_list,tolerance,t_step,realtime_break=None,save=False):
         """Trigger tipping by increasing normal parameter 
