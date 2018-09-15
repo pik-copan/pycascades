@@ -26,26 +26,44 @@ class tipping_network(DiGraph):
             tip_vec.append(self.node[id]['data'].tipped)
         return tip_vec
     
-    def f_prime(self,t,x):
-        """Interface that collects the dx/dt functions of the tipping elements
-        in one vector for common ODE-Solvers.
-        """
+    def get_dxdt_vec(self):
         df = []
-        cpl_vec = np.matrix(x)*nx.adjacency_matrix(self,nodelist=None
-                                                   ,weight='weight').todense()
         for id in self.nodes():
-            f_prime = self.node[id]['data'].dxdt(x[id]) + cpl_vec[0,id]
+            f_prime = self.node[id]['data'].dxdt
             df.append(f_prime)
         return df
+        
+#        """Interface that collects the dx/dt functions of the tipping elements
+#        in one vector for common ODE-Solvers.
+#        """
+#        df = []
+#        cpl_vec = np.matrix(x)*nx.adjacency_matrix(self,nodelist=None
+#                                                   ,weight='weight').todense()
+#        for id in self.nodes():
+#            f_prime = self.node[id]['data'].dxdt(x[id]) + cpl_vec[0,id]
+#            df.append(f_prime)
+#        return df
     
-    def jac(self,t,x):
-        """Returns jacobian for iteration and 
-        stability checkups of fixed points."""
-        jac = nx.adjacency_matrix(self,nodelist=None
-                                                   ,weight='weight').todense()
-        for id in self.nodes():
-            jac[id,id] = self.node[id]['data'].jac(x[id])
+    def get_jac(self):
+#        adj = nx.adjacency_matrix(self,nodelist=None
+#                                 ,weight='weight').todense()
+        jac = []
+        for row_idx in range(0,self.number_of_nodes()):
+            jac_row = []
+            for col_idx in range(0,self.number_of_nodes()):
+                if col_idx == row_idx:
+                    jac_row.append(self.node[row_idx]['data'].jac_diag)
+                else:
+                    jac_row.append(None)
+            jac.append(jac_row)
         return jac
+#        """Returns jacobian for iteration and 
+#        stability checkups of fixed points."""
+#        jac = nx.adjacency_matrix(self,nodelist=None
+#                                                   ,weight='weight').todense()
+#        for id in self.nodes():
+#            jac[id,id] = self.node[id]['data'].jac(x[id])
+#        return jac
     
     def adjust_normal_pars(self,c_eff):
         """Adjust normal parameter so that the sum of coupling and

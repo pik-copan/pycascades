@@ -6,6 +6,11 @@ from scipy.optimize import fsolve
 
 """evolve module"""
 
+class evolve():
+    def __init__(self,tipping_network):
+        self.dxdt_vec = tipping_network.get_dxdt_vec()
+        self.jac = tipping_network.get_jac()
+    
 class net_evolve():
     """net_evolve class
     Provides methods to solve the system and vary system parameters.
