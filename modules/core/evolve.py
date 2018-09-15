@@ -20,8 +20,13 @@ class evolve():
         self.states = []
         self.save_state()
         
-    def f(t,x,self):
-        return [0,0,0,0,0]
+    def f(self,t,x):
+        f = []
+        for idx in range(0,len(x)):
+            dxdt = self.dxdt_vec[idx].__call__(self.pars[-1],x[idx])
+            f.append(dxdt)
+        #print(f)
+        return f
     
     def integrate(self,t_step,t_end):
         """Manually integrate to t_end"""
@@ -33,6 +38,7 @@ class evolve():
         """Save current state"""
         self.times.append(self.r.t)
         self.states.append(self.r.y)
+        self.pars.append(self.pars[-1])
     
 class net_evolve():
     """net_evolve class
@@ -51,16 +57,6 @@ class net_evolve():
         self.r = ode(self.net.f_prime
                      ,self.net.jac).set_integrator('vode', method='adams')
         self.r.set_initial_value(self.init_state,0)
-        
-    def save_state(self):
-        """Save current state"""
-        self.times.append(self.r.t)
-        self.states.append(self.r.y)
-                
-        par_list = []
-        for id in self.net.nodes():
-            par_list.append(self.net.node[id]['data'].c)
-        self.pars.append(par_list)
         
     def get_critical_par(self,tip_id,res=0.001):
         self.net.adjust_normal_pars(0)
