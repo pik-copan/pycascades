@@ -9,12 +9,13 @@ class NoEquilibrium(Exception):
     pass
 
 class evolve():
-    def __init__( self , tipping_network , initial_state , bif_par_func ):
+    def __init__( self , tipping_network , initial_state , bif_par_arr , bif_par_func ):
         # Initialize solver
         self.dxdt_vec = tipping_network.get_dxdt_vec()
         self.jacobian = tipping_network.get_jac()
-        self.r = ode(self.f).set_integrator('vode', method='adams')
+        self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
         self.bif_par_func = bif_par_func
+        self.bif_par_arr = bif_par_arr
         
         # Initialize state
         self.r.set_initial_value(initial_state,0)
@@ -28,7 +29,8 @@ class evolve():
         f = []
         for idx in range(0,len(x)):
             dxdt = self.dxdt_vec[idx][0].__call__( 
-                        self.bif_par_func.__call__(t)[idx] , x[idx] )
+                        self.bif_par_func.__call__(t,len(x))[idx] 
+                        + self.bif_par_arr[idx], x[idx] )
             
             for cpl_id in range(1,len(self.dxdt_vec[idx])):
                 dxdt += self.dxdt_vec[idx][cpl_id][0].__call__( 
@@ -41,9 +43,13 @@ class evolve():
         for row_idx in range(0,len(x)):
             jac_row = []
             for col_idx in range(0,len(x)):
-                jac_row.append( self.jacobian[row_idx][col_idx].__call__(
-                        self.bif_par_func.__call__(t)[row_idx] ,
-                        x[row_idx]))
+                if row_idx == col_idx:
+                    jac_row.append( self.jacobian[row_idx][col_idx].__call__(
+                        self.bif_par_func.__call__(t,len(x))[row_idx] 
+                        + self.bif_par_arr[row_idx] , x[row_idx]))
+                else:
+                    jac_row.append( self.jacobian[row_idx][col_idx].__call__( 
+                                    x[col_idx] , x[row_idx] ) )
             jac.append(jac_row)
         return jac
                             
@@ -57,7 +63,8 @@ class evolve():
         """Save current state"""
         self.times.append(self.r.t)
         self.states.append(self.r.y)
-        self.pars.append(self.bif_par_func.__call__(self.r.t))
+        self.pars.append(self.bif_par_func.__call__(self.r.t,len(self.r.y)) + 
+                         self.bif_par_arr )
         
     def get_tip_state(self):
         return np.array(self.states[-1]) > 0
@@ -104,6 +111,7 @@ class evolve():
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
         val, vec = np.linalg.eig(self.jac(self.r.t,self.r.y))
+        print(self.jac(self.r.t,self.r.y))
         stable = np.less(val,np.zeros((1,len(self.pars[-1]))))
         if stable.all():
             return True

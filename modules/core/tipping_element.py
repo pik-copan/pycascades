@@ -47,7 +47,7 @@ class cusp(tipping_element):
         self.b = b
         self.c = c
         self.dxdt = lambda par,x : self.a*pow(x,3) + self.b*x + par
-        self.jac_diag = lambda par,x : self.a*pow(x,2) + self.b
+        self.jac_diag = lambda par,x : 3*self.a*pow(x,2) + self.b
         
     def dxdt(self):
         """Normal form of cusp"""

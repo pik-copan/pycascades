@@ -15,9 +15,9 @@ from cascades.cascade_data import cascade_data
 class NoEquilibrium(Exception):
     pass
 
-def tip( info , tipping_network , initial_state , bif_par_func , outfile ):
+def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , outfile ):
     
-    net_ev = evolve( tipping_network , initial_state , bif_par_func )
+    net_ev = evolve( tipping_network , initial_state , bif_par_arr , bif_par_func )
     tolerance = 0.005
     t_step = 0.1
     save = True

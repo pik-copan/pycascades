@@ -76,19 +76,13 @@ def create_butterfly(wing_number,wing_size,a,b,c,initial_state,cpl_strength):
 
     id = 1
     for no in range(0,wing_number):
-        cpl = linear_coupling(net.nodes[0]['data']
-			       ,net.nodes[id]['data']
-			       ,cpl_strength)
+        cpl = linear_coupling(cpl_strength)
         net.add_edge(0,id,weight=cpl_strength,data=cpl)
         for k in range(2,wing_size):
-            cpl = linear_coupling(net.nodes[id]['data']
-			       ,net.nodes[id+1]['data']
-			       ,cpl_strength)
+            cpl = linear_coupling(cpl_strength)
             net.add_edge(id,id+1,weight=cpl_strength,data=cpl)
             id+=1
-        cpl = linear_coupling(net.nodes[id]['data']
-			       ,net.nodes[0]['data']
-			       ,cpl_strength)
+        cpl = linear_coupling(cpl_strength)
         net.add_edge(id,0,weight=cpl_strength,data=cpl)
         id+=1
 

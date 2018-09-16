@@ -72,14 +72,17 @@ class tipping_network(DiGraph):
 #            jac[id,id] = self.node[id]['data'].jac(x[id])
 #        return jac
             
-    def adjust_normal_pars(self,c_eff):
-        """Adjust normal parameter so that the sum of coupling and
-        normal parameter (effective normal parameter) equals c_eff"""
-        cpl_vec = np.matrix(self.get_state())*nx.adjacency_matrix(
-                                                    self
-                                                    ,nodelist=None
-                                                    ,weight='weight').todense()
-        for id in self.nodes():
-            self.node[id]['data'].c = c_eff-cpl_vec[0,id]
+    def get_adjusted_bif_par_vec( self , bif_par_eff_vec , initial_state ):
+        """Adjust bifurcation parameter so that the sum of coupling and
+        bifurcation parameter (effective bifurcation parameter) 
+        equals bif_par_eff_vec"""
+        bif_par_vec = []
+        for to_id in range(0,self.number_of_nodes()):
+            cpl_sum = bif_par_eff_vec[to_id]
+            for from_id in range(0,self.number_of_nodes()):
+                if not self.get_edge_data(from_id,to_id) == None:
+                    cpl_sum += -self.get_edge_data(from_id,to_id)['data'].coupling().__call__( initial_state[from_id] , initial_state[to_id] )
             
+            bif_par_vec.append(cpl_sum)
+        return bif_par_vec
     
