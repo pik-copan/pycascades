@@ -54,7 +54,7 @@ class tipping_network(DiGraph):
                 if col_idx == row_idx:
                     jac_row.append(self.node[row_idx]['data'].jac_diag)
                 else:
-                    jac_row.append(None)
+                    jac_row.append(lambda par,x : 0)
             jac.append(jac_row)
         return jac
 #        """Returns jacobian for iteration and 

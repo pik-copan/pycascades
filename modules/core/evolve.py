@@ -5,29 +5,45 @@ import time
 from scipy.optimize import fsolve
 
 """evolve module"""
+class NoEquilibrium(Exception):
+    pass
 
 class evolve():
-    def __init__(self,tipping_network,initial_state,initial_pars):
+    def __init__( self , tipping_network , initial_state , bif_par_func ):
         # Initialize solver
         self.dxdt_vec = tipping_network.get_dxdt_vec()
-        self.jac = tipping_network.get_jac()
-        self.r = ode(self.f).set_integrator('vode', method='adams')
+        self.jacobian = tipping_network.get_jac()
+        self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
+        self.bif_par_func = bif_par_func
         
         # Initialize state
         self.r.set_initial_value(initial_state,0)
         self.times = []
-        self.pars = [initial_pars]
+        self.pars = []
         self.states = []
         self.save_state()
+        self.init_tip_state = self.get_tip_state()
         
     def f(self,t,x):
         f = []
         for idx in range(0,len(x)):
-            dxdt = self.dxdt_vec[idx].__call__(self.pars[-1][idx],x[idx])
+            dxdt = self.dxdt_vec[idx].__call__(
+                        self.bif_par_func.__call__(t)[idx] ,
+                        x[idx])
             f.append(dxdt)
-        #print(f)
         return f
     
+    def jac(self,t,x):
+        jac = []
+        for row_idx in range(0,len(x)):
+            jac_row = []
+            for col_idx in range(0,len(x)):
+                jac_row.append( self.jacobian[row_idx][col_idx].__call__(
+                        self.bif_par_func.__call__(t)[row_idx] ,
+                        x[row_idx]))
+            jac.append(jac_row)
+        return jac
+                            
     def integrate(self,t_step,t_end):
         """Manually integrate to t_end"""
         while self.r.successful() and self.r.t<t_end:
@@ -38,7 +54,16 @@ class evolve():
         """Save current state"""
         self.times.append(self.r.t)
         self.states.append(self.r.y)
-        self.pars.append(self.pars[-1])
+        self.pars.append(self.bif_par_func.__call__(self.r.t))
+        
+    def get_tip_state(self):
+        return np.array(self.states[-1]) > 0
+    
+    def number_tipped(self):
+        """Return number of tipped elements"""
+        #N = len(max(nx.weakly_connected_components(self.net),key=len))
+        tip_list = list(map(xor,self.init_tip_state,self.get_tip_state()))
+        return sum(tip_list)
         
     def equilibrate(self,tolerance,t_step,save,realtime_break=None):
         """Iterate system until it is in equilibrium. 
@@ -64,7 +89,7 @@ class evolve():
         """Check if the system is in an equilibrium state, e.g. if the 
         absolute value of all elements of f_prime is less than tolerance. 
         If True the state can be considered as close to a fixed point"""
-        fix = np.less(np.abs(self.f(0,self.r.y))
+        fix = np.less(np.abs(self.f(self.r.t,self.r.y))
                      ,tolerance*np.ones((1
                      ,len(self.pars[-1]))))
         if fix.all():
@@ -75,7 +100,7 @@ class evolve():
     def is_stable(self):
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
-        val, vec = np.linalg.eig(self.jac(0,self.r.y))
+        val, vec = np.linalg.eig(self.jac(self.r.t,self.r.y))
         stable = np.less(val,np.zeros((1,len(self.pars[-1]))))
         if stable.all():
             return True
@@ -151,6 +176,3 @@ class net_evolve():
         #N = len(max(nx.weakly_connected_components(self.net),key=len))
         tip_list = list(map(xor,self.init_tip_state,self.net.get_tip_state()))
         return sum(tip_list)
-                
-class NoEquilibrium(Exception):
-    pass
