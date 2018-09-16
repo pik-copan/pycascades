@@ -28,9 +28,13 @@ class tipping_network(DiGraph):
     
     def get_dxdt_vec(self):
         df = []
-        for id in self.nodes():
-            f_prime = self.node[id]['data'].dxdt
+        for node in self.nodes():
+            f_prime = [self.node[node]['data'].dxdt]
             df.append(f_prime)
+            
+        for edge in self.edges(data=True):
+            to_node = edge[1]
+            df[to_node].append((edge[2]['data'].coupling(),edge[0]))
         return df
         
 #        """Interface that collects the dx/dt functions of the tipping elements
@@ -54,7 +58,10 @@ class tipping_network(DiGraph):
                 if col_idx == row_idx:
                     jac_row.append(self.node[row_idx]['data'].jac_diag)
                 else:
-                    jac_row.append(lambda par,x : 0)
+                    if not self.get_edge_data(col_idx,row_idx) == None:
+                        jac_row.append(self.get_edge_data(col_idx,row_idx)['data'].cpl_jac())
+                    else:
+                        jac_row.append(lambda x_from , x_to : 0)
             jac.append(jac_row)
         return jac
 #        """Returns jacobian for iteration and 

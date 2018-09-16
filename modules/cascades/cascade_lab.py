@@ -29,7 +29,6 @@ def tip( info , tipping_network , initial_state , bif_par_func , outfile ):
         print("Warning: Initial state is not a stable point of the system")
         
     while net_ev.number_tipped()<1:
-        print('while')
         try:
             net_ev.equilibrate(tolerance,t_step,save,realtime_break)
         except NoEquilibrium:

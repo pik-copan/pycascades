@@ -9,15 +9,14 @@ class linear_coupling:
     """Class for linear coupling
     The coupling consists of a factor (strength) and a coupling element.
     """
-    def __init__(self,_from,_to,strength):
+    def __init__(self,strength):
         """Constructor"""
         self.strength = strength
-        self._to = _to
-        self._from = _from
         
-    def coupling(self,x):
-        """Returns the value for the coupling term depending on the strength 
-        and the state x of the coupling element.
-        """
-        return self.strength*x
+    def coupling(self):
+        """Returns callable for the coupling term."""
+        return lambda x_from , x_to : self.strength*x_from
+    
+    def cpl_jac(self):
+        return lambda x_from , x_to : self.strength
 		

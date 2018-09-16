@@ -157,9 +157,15 @@ def create_watts_strogatz(
         if negative_coupling:
             if randint(0,1):
                 net.edges[id]['weight'] = cpl_strength
+                cpl = linear_coupling(cpl_strength)
+                net.edges[id]['data'] = cpl
             else:
                 net.edges[id]['weight'] = -cpl_strength
+                cpl = linear_coupling(-cpl_strength)
+                net.edges[id]['data'] = cpl
         else:
             net.edges[id]['weight'] = cpl_strength
+            cpl = linear_coupling(cpl_strength)
+            net.edges[id]['data'] = cpl
     
     return net

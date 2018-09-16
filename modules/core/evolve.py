@@ -13,7 +13,7 @@ class evolve():
         # Initialize solver
         self.dxdt_vec = tipping_network.get_dxdt_vec()
         self.jacobian = tipping_network.get_jac()
-        self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
+        self.r = ode(self.f).set_integrator('vode', method='adams')
         self.bif_par_func = bif_par_func
         
         # Initialize state
@@ -27,9 +27,12 @@ class evolve():
     def f(self,t,x):
         f = []
         for idx in range(0,len(x)):
-            dxdt = self.dxdt_vec[idx].__call__(
-                        self.bif_par_func.__call__(t)[idx] ,
-                        x[idx])
+            dxdt = self.dxdt_vec[idx][0].__call__( 
+                        self.bif_par_func.__call__(t)[idx] , x[idx] )
+            
+            for cpl_id in range(1,len(self.dxdt_vec[idx])):
+                dxdt += self.dxdt_vec[idx][cpl_id][0].__call__( 
+                             x[self.dxdt_vec[idx][cpl_id][1]] , x[idx] )
             f.append(dxdt)
         return f
     
