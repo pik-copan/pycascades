@@ -49,9 +49,7 @@ class evolve():
             jac[idx,idx] = self.jac_dict["diag"][idx].__call__(
                                 self.bif_par_func.__call__(t,len(x))[idx] 
                                 + self.bif_par_arr[idx] , x[idx] )
-            
 
-        print(jac)
         return jac
                             
     def integrate(self,t_step,t_end):

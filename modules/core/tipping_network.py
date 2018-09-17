@@ -21,7 +21,6 @@ class tipping_network(DiGraph):
         n = self.number_of_nodes()
         jac_cpl = [[lambda x1,x2: 0 for j in range(n)] for i in range(n)]
         for edge in self.edges():
-            print(edge)
             jac_cpl[edge[1]][edge[0]] = self.get_edge_data(edge[0]
                                                     ,edge[1])['data'].jac_cpl()
         return { "diag" : jac_diag , "cpl" : jac_cpl }
