@@ -11,7 +11,7 @@ class evolve():
     def __init__( self , tipping_network , initial_state , bif_par_arr , bif_par_func ):
         # Initialize solver
         self.dxdt_vec = tipping_network.get_dxdt_vec()
-        self.jacobian = tipping_network.get_jac()
+        self.jac_dict = tipping_network.get_jac()
         self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
         self.bif_par_func = bif_par_func
         self.bif_par_arr = bif_par_arr
@@ -38,18 +38,20 @@ class evolve():
         return f
     
     def jac(self,t,x):
-        jac = []
+        jac = np.empty((len(x),len(x)))
+        
         for row_idx in range(0,len(x)):
-            jac_row = []
             for col_idx in range(0,len(x)):
-                if row_idx == col_idx:
-                    jac_row.append( self.jacobian[row_idx][col_idx].__call__(
-                        self.bif_par_func.__call__(t,len(x))[row_idx] 
-                        + self.bif_par_arr[row_idx] , x[row_idx]))
-                else:
-                    jac_row.append( self.jacobian[row_idx][col_idx].__call__( 
-                                    x[col_idx] , x[row_idx] ) )
-            jac.append(jac_row)
+                jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__( 
+                                            x[col_idx] , x[row_idx] )
+        
+        for idx in range(0,len(x)):
+            jac[idx,idx] = self.jac_dict["diag"][idx].__call__(
+                                self.bif_par_func.__call__(t,len(x))[idx] 
+                                + self.bif_par_arr[idx] , x[idx] )
+            
+
+        print(jac)
         return jac
                             
     def integrate(self,t_step,t_end):

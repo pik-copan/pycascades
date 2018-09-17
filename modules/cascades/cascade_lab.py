@@ -43,7 +43,7 @@ def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , o
     else:
         c_data = cascade_data()
 
-    c_data.add_cascade( info , net_ev.number_tipped() ,
+    c_data.add_cascade( info , tipping_network , net_ev.number_tipped() ,
                         net_ev.times , net_ev.pars , net_ev.states )
     
     file = open( outfile , 'wb' )

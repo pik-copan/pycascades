@@ -10,8 +10,8 @@ class cascade_data(list):
     def __init__(self):
         pass
     
-    def add_cascade( self , info , size , t_array=None
-                   , par_series=None , time_series=None , tipping_network = None):
+    def add_cascade( self , info , tipping_network , size , t_array=None
+                   , par_series=None , time_series=None ):
         
         casc_dict = { "info" : info
                     , "net" : tipping_network

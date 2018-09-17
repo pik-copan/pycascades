@@ -14,19 +14,17 @@ class tipping_network(DiGraph):
         return df
 
     def get_jac(self):
-        jac = []
-        for row_idx in range(0,self.number_of_nodes()):
-            jac_row = []
-            for col_idx in range(0,self.number_of_nodes()):
-                if col_idx == row_idx:
-                    jac_row.append(self.node[row_idx]['data'].jac_diag())
-                else:
-                    if not self.get_edge_data(col_idx,row_idx) == None:
-                        jac_row.append(self.get_edge_data(col_idx,row_idx)['data'].jac_cpl())
-                    else:
-                        jac_row.append(lambda x_from , x_to : 0)
-            jac.append(jac_row)
-        return jac
+        jac_diag = []
+        for idx in range(0,self.number_of_nodes()):
+            jac_diag.append(self.node[idx]['data'].jac_diag())
+        
+        n = self.number_of_nodes()
+        jac_cpl = [[lambda x1,x2: 0 for j in range(n)] for i in range(n)]
+        for edge in self.edges():
+            print(edge)
+            jac_cpl[edge[1]][edge[0]] = self.get_edge_data(edge[0]
+                                                    ,edge[1])['data'].jac_cpl()
+        return { "diag" : jac_diag , "cpl" : jac_cpl }
             
     def get_adjusted_bif_par_vec( self , bif_par_eff_vec , initial_state ):
         """Adjust bifurcation parameter so that the sum of coupling and
