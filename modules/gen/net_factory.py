@@ -7,7 +7,9 @@ from random import randint
 import networkx as nx
 
 """net_factory module that provides functions to generate 
-   user defined networks from parameters"""
+   user defined networks from parameters
+   Warning: Functions could be outdated and might have to be
+   updated to make them work!!!"""
 
 def create_one_cusp(a,b,initial_state):
     tc0 = cusp(0,a,b)

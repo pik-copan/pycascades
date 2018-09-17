@@ -3,6 +3,8 @@
 Provides classes for tipping_element objects
 """
 
+
+
 class tipping_element:
     """Abstract tipping_element class
     This class provides the interface for tipping_element classes.
@@ -18,8 +20,22 @@ class tipping_element:
         concrete tipping_element classes to implement
         the special form of the tipping element.
         """
-        self.dxdt = lambda par,x : 0
-        self.jac_diag = lambda par,x: 0
+        
+    def dxdt_diag(self):
+        """dx/dt diagonal element of tipping element. 
+        This method should be overwritten from the 
+        concrete tipping_element classes to implement
+        the special form of the tipping element.
+        """
+        return lambda par,x : 0
+    
+    def jac_diag(self):
+        """jacobian diagonal element of tipping element. 
+        This method should be overwritten from the 
+        concrete tipping_element classes to implement
+        the special form of the tipping element.
+        """
+        return lambda par,x: 0
 
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
@@ -28,5 +44,11 @@ class cusp(tipping_element):
         tipping_element.__init__(self,id_number)
         self.a = a
         self.b = b
-        self.dxdt = lambda par,x : self.a*pow(x,3) + self.b*x + par
-        self.jac_diag = lambda par,x : 3*self.a*pow(x,2) + self.b
+        
+    def dxdt_diag(self):
+        """returns callable of dx/dt diagonal element of cusp"""
+        return lambda par,x : self.a*pow(x,3) + self.b*x + par
+    
+    def jac_diag(self):
+        """returns callable jacobian diagonal element of cusp."""
+        return lambda par,x : 3*self.a*pow(x,2) + self.b

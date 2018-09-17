@@ -66,6 +66,7 @@ class evolve():
                          self.bif_par_arr )
         
     def get_tip_state(self):
+        """Calculate binary array of tip states"""
         return np.array(self.states[-1]) > 0
     
     def number_tipped(self):
@@ -110,7 +111,6 @@ class evolve():
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
         val, vec = np.linalg.eig(self.jac(self.r.t,self.r.y))
-        print(self.jac(self.r.t,self.r.y))
         stable = np.less(val,np.zeros((1,len(self.pars[-1]))))
         if stable.all():
             return True

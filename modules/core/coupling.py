@@ -13,10 +13,11 @@ class linear_coupling:
         """Constructor"""
         self.strength = strength
         
-    def coupling(self):
-        """Returns callable for the coupling term."""
+    def dxdt_cpl(self):
+        """Returns callable for the coupling term of dxdt."""
         return lambda x_from , x_to : self.strength*x_from
     
-    def cpl_jac(self):
+    def jac_cpl(self):
+        """Returns callable for the jacobian coupling matrix element."""
         return lambda x_from , x_to : self.strength
 		
