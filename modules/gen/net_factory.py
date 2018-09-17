@@ -9,16 +9,15 @@ import networkx as nx
 """net_factory module that provides functions to generate 
    user defined networks from parameters"""
 
-def create_one_cusp(a,b,c,initial_state):
-    tc0 = cusp(0,a,b,c)
-    tc0.update_state(initial_state)
+def create_one_cusp(a,b,initial_state):
+    tc0 = cusp(0,a,b)
     net = tipping_network()
     net.add_node(0,data=tc0)
     return net
 
 
 def create_cusp_chain(
-    number,a,b,c,initial_state,cpl_strength,opt='uniform'
+    number,a,b,initial_state,cpl_strength,opt='uniform'
     ):
     if opt == 'uniform':
         pass
@@ -27,8 +26,7 @@ def create_cusp_chain(
 
     net = tipping_network()
     for id in range(0,number):
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.add_node(id,data=tc)
 
     for id in range(1,number):
@@ -40,12 +38,11 @@ def create_cusp_chain(
 		
     return net
 
-def create_two_cusps(a,b,c,initial_state,cpl_strength,negative_coupling=False):
+def create_two_cusps(a,b,initial_state,cpl_strength,negative_coupling=False):
 
     net = tipping_network()
     for id in range(0,2):
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.add_node(id,data=tc)
 
     if negative_coupling:
@@ -66,12 +63,11 @@ def create_two_cusps(a,b,c,initial_state,cpl_strength,negative_coupling=False):
 		
     return net
 
-def create_butterfly(wing_number,wing_size,a,b,c,initial_state,cpl_strength):
+def create_butterfly(wing_number,wing_size,a,b,initial_state,cpl_strength):
     net = tipping_network()
     net_size = wing_number*(wing_size - 1) + 1
     for id in range(0,net_size):
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.add_node(id,data=tc)
 
     id = 1
@@ -88,11 +84,10 @@ def create_butterfly(wing_number,wing_size,a,b,c,initial_state,cpl_strength):
 
     return net
     
-def create_ring(number,a,b,c,initial_state,cpl_strength):
+def create_ring(number,a,b,initial_state,cpl_strength):
     net = tipping_network()
     for id in range(0,number):
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.add_node(id,data=tc)
 
     for id in range(1,number):
@@ -111,7 +106,7 @@ def create_ring(number,a,b,c,initial_state,cpl_strength):
     return net
 
 def create_erdos_renyi(
-    num,average_degree,a,b,c,initial_state,cpl_strength,
+    num,average_degree,a,b,initial_state,cpl_strength,
     negative_coupling=False,seed=None
     ):
     prob = average_degree/(num-1)
@@ -119,8 +114,7 @@ def create_erdos_renyi(
     net.__class__ = tipping_network
     tc = cusp
     for id in net.nodes():
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.node[id]['data'] = tc
     
     for id in net.edges():
@@ -135,7 +129,7 @@ def create_erdos_renyi(
     return net
 
 def create_watts_strogatz(
-    num,average_degree,rewiring_probability,a,b,c,initial_state,
+    num,average_degree,rewiring_probability,a,b,initial_state,
     cpl_strength,tries=100,negative_coupling=False,seed=None
     ):
     net = nx.connected_watts_strogatz_graph(num,average_degree,rewiring_probability,
@@ -143,8 +137,7 @@ def create_watts_strogatz(
     net.__class__ = tipping_network
     tc = cusp
     for id in net.nodes():
-        tc = cusp(id,a,b,c)
-        tc.update_state(initial_state)
+        tc = cusp(id,a,b)
         net.node[id]['data'] = tc
     
     for id in net.edges():

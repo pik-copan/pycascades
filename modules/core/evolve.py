@@ -2,7 +2,6 @@ from scipy.integrate import ode
 import numpy as np
 from operator import xor
 import time
-from scipy.optimize import fsolve
 
 """evolve module"""
 class NoEquilibrium(Exception):
@@ -117,73 +116,3 @@ class evolve():
             return True
         else:
             return False
-    
-class net_evolve():
-    """net_evolve class
-    Provides methods to solve the system and vary system parameters.
-    """
-    def __init__(self,network):
-        """Constructor"""
-        self.net = network
-        self.init_tip_state = self.net.get_tip_state()
-        self.init_state = self.net.get_state()
-        
-        self.times = []
-        self.pars = []
-        self.states = []
-        
-        self.r = ode(self.net.f_prime
-                     ,self.net.jac).set_integrator('vode', method='adams')
-        self.r.set_initial_value(self.init_state,0)
-        
-    def get_critical_par(self,tip_id,res=0.001):
-        self.net.adjust_normal_pars(0)
-        if not self.net.is_stable():
-            print("Initially unstable!")
-        while self.net.is_stable():
-            self.net.node[tip_id]['data'].c+=res
-            x_new = fsolve(lambda x : self.net.f_prime(0,x)
-                            ,-np.ones(len(self.net.get_state()))
-                            ,fprime = lambda x : self.net.jac(0,x) )
-            self.net.set_state(x_new)
-        
-        critical_par = self.net.node[tip_id]['data'].c
-        x_crit = self.net.get_state()
-        self.net.set_state(self.init_state)
-        self.net.adjust_normal_pars(0)
-        return critical_par,x_crit
-            
-    def tip(self,tip_id_list,tolerance,t_step,realtime_break=None,save=False):
-        """Trigger tipping by increasing normal parameter 
-        of the elements with id from tip_id_list"""
-        self.net.adjust_normal_pars(0)
-        self.net.set_state(self.r.y)
-        if save:
-            self.save_state()
-        if not self.net.is_fixed_point(tolerance):
-            print("Warning: Initial state is not a fixed point of the system")
-        elif not self.net.is_stable():
-            print("Warning: Initial state is not a stable point of the system")
-        
-        tipped_id_list = np.full(len(tip_id_list), False)
-        while not all(tipped_id_list):
-            try:
-                self.equilibrate(tolerance,t_step,save,realtime_break)
-            except NoEquilibrium:
-                print("No equilibrium found " \
-                      "in "+str(realtime_break)+" realtime seconds."\
-                      " Increase tolerance or breaktime.")
-                break
-            
-            for id in tip_id_list:
-                self.net.node[id]['data'].c+=0.01*t_step
-                tipped_id_list[id] = xor(tipped_id_list[id]
-                                     ,self.net.node[id]['data'].tipped)
-                
-        return self.number_tipped()
-                
-    def number_tipped(self):
-        """Return number of tipped elements"""
-        #N = len(max(nx.weakly_connected_components(self.net),key=len))
-        tip_list = list(map(xor,self.init_tip_state,self.net.get_tip_state()))
-        return sum(tip_list)

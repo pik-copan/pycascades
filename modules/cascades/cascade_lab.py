@@ -48,3 +48,28 @@ def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , o
     
     file = open( outfile , 'wb' )
     pickle.dump( c_data , file )
+    
+    
+"""
+TODO: Integrate get_critical_par method, that was initially in
+evolve module here!!!
+
+from scipy.optimize import fsolve
+
+    def get_critical_par(self,tip_id,res=0.001):
+        self.net.adjust_normal_pars(0)
+        if not self.net.is_stable():
+            print("Initially unstable!")
+        while self.net.is_stable():
+            self.net.node[tip_id]['data'].c+=res
+            x_new = fsolve(lambda x : self.net.f_prime(0,x)
+                            ,-np.ones(len(self.net.get_state()))
+                            ,fprime = lambda x : self.net.jac(0,x) )
+            self.net.set_state(x_new)
+        
+        critical_par = self.net.node[tip_id]['data'].c
+        x_crit = self.net.get_state()
+        self.net.set_state(self.init_state)
+        self.net.adjust_normal_pars(0)
+        return critical_par,x_crit
+"""
