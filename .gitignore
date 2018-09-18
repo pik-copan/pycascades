@@ -5,4 +5,7 @@ modules/gen/*.pyc
 modules/gen/__pycache__
 modules/cascades/*.pyc
 modules/cascades/__pycache__
+
+.idea/
+
 scripts/*
