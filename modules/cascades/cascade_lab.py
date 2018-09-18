@@ -52,7 +52,7 @@ def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , o
     
 """
 TODO: Integrate get_critical_par method, that was initially in
-evolve module here!!!
+evolve module, here!!!
 
 from scipy.optimize import fsolve
 

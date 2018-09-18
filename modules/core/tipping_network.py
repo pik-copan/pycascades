@@ -2,16 +2,18 @@ from networkx import DiGraph
 
 class tipping_network(DiGraph):
     
-    def get_dxdt_vec(self):
-        df = []
+    def get_dxdt(self):
+        dxdt_diag = []
+        dxdt_cpl = []
         for node in self.nodes():
-            f_prime = [self.node[node]['data'].dxdt_diag()]
-            df.append(f_prime)
-            
-        for edge in self.edges(data=True):
-            to_node = edge[1]
-            df[to_node].append((edge[2]['data'].dxdt_cpl(),edge[0]))
-        return df
+            dxdt_diag.append(self.node[node]['data'].dxdt_diag())
+            dxdt_row = []
+            for in_edge in self.in_edges(nbunch=[node],data=True):
+                dxdt_row.append(
+                        [in_edge[0],in_edge[1],in_edge[2]['data'].dxdt_cpl()])
+            dxdt_cpl.append(dxdt_row)
+
+        return { "diag" : dxdt_diag , "cpl" : dxdt_cpl }
 
     def get_jac(self):
         jac_diag = []
@@ -34,7 +36,10 @@ class tipping_network(DiGraph):
             cpl_sum = bif_par_eff_vec[to_id]
             for from_id in range(0,self.number_of_nodes()):
                 if not self.get_edge_data(from_id,to_id) == None:
-                    cpl_sum += -self.get_edge_data(from_id,to_id)['data'].dxdt_cpl().__call__( initial_state[from_id] , initial_state[to_id] )
+                    cpl_val = self.get_edge_data(
+                                        from_id,to_id)['data'].dxdt_cpl()
+                    cpl_sum += -cpl_val.__call__( initial_state[from_id] 
+                                                , initial_state[to_id] )
             
             bif_par_vec.append(cpl_sum)
         return bif_par_vec

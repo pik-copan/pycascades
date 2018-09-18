@@ -131,7 +131,7 @@ def create_erdos_renyi(
     return net
 
 def create_watts_strogatz(
-    num,average_degree,rewiring_probability,a,b,initial_state,
+    num,average_degree,rewiring_probability,a,b,
     cpl_strength,tries=100,negative_coupling=False,seed=None
     ):
     net = nx.connected_watts_strogatz_graph(num,average_degree,rewiring_probability,

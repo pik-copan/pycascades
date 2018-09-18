@@ -8,9 +8,9 @@ class NoEquilibrium(Exception):
     pass
 
 class evolve():
-    def __init__( self , tipping_network , initial_state , bif_par_arr , bif_par_func ):
+    def __init__( self , tipping_network , initial_state , bif_par_arr , bif_par_func = lambda t,size : np.zeros(size) ):
         # Initialize solver
-        self.dxdt_vec = tipping_network.get_dxdt_vec()
+        self.dxdt = tipping_network.get_dxdt()
         self.jac_dict = tipping_network.get_jac()
         self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
         self.bif_par_func = bif_par_func
@@ -25,16 +25,14 @@ class evolve():
         self.init_tip_state = self.get_tip_state()
         
     def f(self,t,x):
-        f = []
+        f = np.zeros(len(x))
         for idx in range(0,len(x)):
-            dxdt = self.dxdt_vec[idx][0].__call__( 
-                        self.bif_par_func.__call__(t,len(x))[idx] 
-                        + self.bif_par_arr[idx], x[idx] )
+            f[idx] = self.dxdt["diag"][idx].__call__( 
+                         self.bif_par_func.__call__(t,len(x))[idx] 
+                       + self.bif_par_arr[idx], x[idx] )
             
-            for cpl_id in range(1,len(self.dxdt_vec[idx])):
-                dxdt += self.dxdt_vec[idx][cpl_id][0].__call__( 
-                             x[self.dxdt_vec[idx][cpl_id][1]] , x[idx] )
-            f.append(dxdt)
+            for cpl in self.dxdt["cpl"][idx]:
+                f[idx] += cpl[2].__call__( x[cpl[0]] , x[idx] )
         return f
     
     def jac(self,t,x):
