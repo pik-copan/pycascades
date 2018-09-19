@@ -1,3 +1,4 @@
+import math
 """coupling module
 
 Provides classes for couplings.
@@ -25,6 +26,9 @@ class coupling:
               'recommented or the method coupling() has not been overwritten')
         return 0.0
 
+    def projection(self):
+        return lambda t : 1
+
 
 class linear_coupling(coupling):
     """Class for linear coupling
@@ -37,36 +41,144 @@ class linear_coupling(coupling):
         
     def dxdt_cpl(self):
         """Returns callable for the coupling term of dxdt."""
-        return lambda x_from , x_to : self.strength*x_from
+        return lambda t, x_from , x_to : self.strength*x_from
     
     def jac_cpl(self):
         """Returns callable for the jacobian coupling matrix element."""
-        return lambda x_from , x_to : self.strength
+        return lambda t, x_from , x_to : self.strength
+    
+    def jac_diag(self):
+        return lambda t, x_from , x_to : 0
 		
 
 
-class hopf_coupling(coupling):
-    """Class for coupling of two (Hopf) tipping_elements according to
-    Hopfbifurcation.
-    The coupling consists of two terms -a*x_1^2*x_2 and b*x_1, x_1 being the
-    originate node of the coupling effecting x_2"""
+class cusp_to_hopf(coupling):
+    """Class for coupling """
 
-    def __init__(self, _from, _to, a, b):
-        """Constructor"""
-        self.a = a
-        self.b = b
-        self._to = _to
-        self._from = _from
+    def __init__(self, _from, _to, a, strength):
+        coupling.__init__(self, _from, _to)
+        self._strength = strength
+        self._a = a
+
+    #
+    # def __init__(self, _from, _to, a, strength):
+    #     """Constructor"""
+    #     coupling.__init__(_from, _to)
+    #     self._strength = strength
+    #     self._a = a
 
     def dxdt_cpl(self):
-        return lambda x_from, x_to : -self.a*pow(x_from,2)*x_to+self.b*x_from
+        """coupling"""
+        return lambda t, x_from, r_to : self._a*r_to*self._strength*x_from
 
-    def jac_clp(self):
-        # not symmetric coupling! und nu?
-        # was ist mit init, coupling? und Parametern?
+    def jac_cpl(self):
+        """partial derivative of dxdt with respect to x_from"""
+        return lambda t, x_from, r_to : self._a*r_to*self._strength
 
-    def coupling(self, x_1, x_2, a, b):
-        """Method returns coupling from Hopf tipping_element x_1 to Hopf
-        tipping_element x_2: -a*x_1^2*x_2+b*x_1"""
-        return -a*pow(x_1,2)*x_2+b*x_1
+    def jac_diag(self):
+        """partial derivative with respect to r_to"""
+        return lambda t, x_from, r_to : self._a*self._strength*x_from
 
+
+class hopf_x_to_cusp(coupling):
+    """Class for coupling """
+
+    def __init__(self, _from, _to, a, b, strength):
+        """Constructor"""
+        coupling.__init__(self, _from, _to)
+        self._a = a
+        self._b = b
+        self._strength = strength
+
+    def dxdt_cpl(self):
+        """coupling"""
+        return lambda t, r_from, x_to : self._strength*r_from*math.cos(self._b
+                                                                       *t)
+
+    def jac_cpl(self):
+        """partial derivative of dxdt with respect to r_from"""
+        return lambda t, r_from, x_to : self._strength*math.cos(self._b*t)
+        # return lambda t, r_from, x_to: self._strength
+
+    def jac_diag(self):
+        """partial derivative with respect to x_to"""
+        return lambda t, r_from, x_to : 0
+
+    def projection(self):
+        return lambda t : math.cos(self._b*t)
+
+class hopf_y_to_cusp(coupling):
+    """Class for coupling """
+
+    def __init__(self, _from, _to, a, b, strength):
+        """Constructor"""
+        coupling.__init__(self, _from, _to)
+        self._a = a
+        self._b = b
+        self._strength = strength
+
+    def dxdt_cpl(self):
+        """coupling"""
+        return lambda t, r_from, x_to : self._strength*r_from*math.sin(self._b
+                                                                       *t)
+
+    def jac_cpl(self):
+        """partial derivative of dxdt with respect to r_from"""
+        return lambda t, r_from, x_to : self._strength*math.sin(self._b*t)
+        # return lambda t, r_from, x_to : self._strength
+
+    def jac_diag(self):
+        """partial derivative with respect to x_to"""
+        return lambda t, r_from, x_to : 0
+
+    def projection(self):
+        return lambda t : math.sin(self._b*t)
+
+class hopf_x_to_hopf(coupling):
+    """Class for coupling """
+    def __init__(self, _from, _to, a_to, b_from, strength):
+        coupling.__init__(self, _from, _to)
+        self._a_to = a_to
+        self._b_from = b_from
+        self._strength = strength
+
+    def dxdt_cpl(self):
+        return lambda t, r_from, r_to : self._a_to*r_to*self._strength*r_from*\
+                                        math.cos(self._b_from*t)
+
+    def jac_cpl(self):
+        return lambda t, r_from, r_to : self._a_to*r_to*self._strength*\
+                                      math.cos(self._b_from*t)
+        # return lambda t, r_from, r_to : self._a_to*r_to*self._strength
+
+    def jac_diag(self):
+        return lambda t, r_from, r_to : self._a_to*self._strength*r_from*\
+                                        math.cos(self._b_from*t)
+
+    def projection(self):
+        return lambda t : math.cos(self._b_from*t)
+
+class hopf_y_to_hopf(coupling):
+    """Class for coupling """
+
+    def __init__(self, _from, _to, a_to, b_from, strength):
+        coupling.__init__(self, _from, _to)
+        self._a_to = a_to
+        self._b_from = b_from
+        self._strength = strength
+
+    def dxdt_cpl(self):
+        return lambda t, r_from, r_to: self._a_to*r_to*self._strength*r_from*\
+                                       math.sin(self._b_from * t)
+
+    def jac_cpl(self):
+        return lambda t, r_from, r_to: self._a_to*r_to*self._strength*\
+                                     math.sin(self._b_from * t)
+        # return lambda t, r_from, r_to: self._a_to*r_to*self._strength
+
+    def jac_diag(self):
+        return lambda t, r_from, r_to: self._a_to*self._strength*r_from*\
+                                       math.sin(self._b_from * t)
+
+    def projection(self):
+        return lambda t : math.sin(self._b_from * t)

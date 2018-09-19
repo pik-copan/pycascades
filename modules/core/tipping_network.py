@@ -5,10 +5,10 @@ class tipping_network(DiGraph):
     def get_dxdt(self):
         dxdt_diag = []
         dxdt_cpl = []
-        for node in self.nodes():
-            dxdt_diag.append(self.node[node]['data'].dxdt_diag())
+        for idx in range(0,self.number_of_nodes()):
+            dxdt_diag.append(self.node[idx]['data'].dxdt_diag())
             dxdt_row = []
-            for in_edge in self.in_edges(nbunch=[node],data=True):
+            for in_edge in self.in_edges(nbunch=[idx],data=True):
                 dxdt_row.append(
                         [in_edge[0],in_edge[1],in_edge[2]['data'].dxdt_cpl()])
             dxdt_cpl.append(dxdt_row)
@@ -17,14 +17,17 @@ class tipping_network(DiGraph):
 
     def get_jac(self):
         jac_diag = []
-        for idx in range(0,self.number_of_nodes()):
+        n = self.number_of_nodes()           
+        for idx in range(0,n):
             jac_diag.append(self.node[idx]['data'].jac_diag())
         
-        n = self.number_of_nodes()
-        jac_cpl = [[lambda x1,x2: 0 for j in range(n)] for i in range(n)]
+        jac_cpl = [[lambda t,x1,x2: 0 for j in range(n)] for i in range(n)]
         for edge in self.edges():
+            jac_cpl[edge[1]][edge[1]] = self.get_edge_data(edge[0]
+                                                ,edge[1])['data'].jac_diag()
             jac_cpl[edge[1]][edge[0]] = self.get_edge_data(edge[0]
-                                                    ,edge[1])['data'].jac_cpl()
+                                                ,edge[1])['data'].jac_cpl()
+        
         return { "diag" : jac_diag , "cpl" : jac_cpl }
             
     def get_adjusted_bif_par_vec( self , bif_par_eff_vec , initial_state ):
@@ -38,9 +41,19 @@ class tipping_network(DiGraph):
                 if not self.get_edge_data(from_id,to_id) == None:
                     cpl_val = self.get_edge_data(
                                         from_id,to_id)['data'].dxdt_cpl()
-                    cpl_sum += -cpl_val.__call__( initial_state[from_id] 
+                    cpl_sum += -cpl_val.__call__( 0 , initial_state[from_id] 
                                                 , initial_state[to_id] )
             
             bif_par_vec.append(cpl_sum)
         return bif_par_vec
-    
+
+    """Method added by Doro"""
+    def get_projections(self):
+        # proj = lambda t: [[1 for j in range(self.number_of_nodes())] for i in range(self.number_of_nodes())]
+        # for edge in self.in_edges(data=True):
+        #     proj[edge[0]][edge[1]] = self.get_edge_data(edge[0], edge[1])['data'].projection()
+        proj = []
+        for i in range(self.number_of_nodes()):
+            proj.append((self.node[i]['data'].get_b()))
+            # proj.append((n['data'].get_b()))
+        return proj

@@ -13,6 +13,7 @@ class evolve():
         self.dxdt = tipping_network.get_dxdt()
         self.jac_dict = tipping_network.get_jac()
         self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
+        # array of functions changing respective bifurcation parameter
         self.bif_par_func = bif_par_func
         self.bif_par_arr = bif_par_arr
         
@@ -23,16 +24,19 @@ class evolve():
         self.states = []
         self.save_state()
         self.init_tip_state = self.get_tip_state()
-        
+        # added by Doro
+        self._projection_func = tipping_network.get_projections()
+
+
     def f(self,t,x):
         f = np.zeros(len(x))
         for idx in range(0,len(x)):
-            f[idx] = self.dxdt["diag"][idx].__call__( 
+            f[idx] = self.dxdt["diag"][idx].__call__(t,
                          self.bif_par_func.__call__(t,len(x))[idx] 
                        + self.bif_par_arr[idx], x[idx] )
             
             for cpl in self.dxdt["cpl"][idx]:
-                f[idx] += cpl[2].__call__( x[cpl[0]] , x[idx] )
+                f[idx] += cpl[2].__call__( t, x[cpl[0]] , x[idx] )
         return f
     
     def jac(self,t,x):
@@ -40,11 +44,11 @@ class evolve():
         
         for row_idx in range(0,len(x)):
             for col_idx in range(0,len(x)):
-                jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__( 
+                jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__(  t,
                                             x[col_idx] , x[row_idx] )
         
         for idx in range(0,len(x)):
-            jac[idx,idx] = self.jac_dict["diag"][idx].__call__(
+            jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
                                 self.bif_par_func.__call__(t,len(x))[idx] 
                                 + self.bif_par_arr[idx] , x[idx] )
 

@@ -38,6 +38,12 @@ class tipping_element:
         """
         return lambda par,x: 0
 
+    """ method added by Doro"""
+    def get_b(self):
+        print('Warning: Either use of abstract tipping_element which is not '
+              'recommended or function has not been overwritten.')
+        return 1
+
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
     def __init__(self, id_number, a, b ):
@@ -48,16 +54,19 @@ class cusp(tipping_element):
         
     def dxdt_diag(self):
         """returns callable of dx/dt diagonal element of cusp"""
-        return lambda par,x : self.a*pow(x,3) + self.b*x + par
+        return lambda t, par, x : self.a*pow(x,3) + self.b*x + par
     
     def jac_diag(self):
-        """returns callable jacobian diagonal element of cusp"""
-        return lambda par,x : 3*self.a*pow(x,2) + self.b
+        """returns callable jacobian diagonal element of cusp."""
+        return lambda t, par, x : 3*self.a*pow(x,2) + self.b
 
 
 class hopf(tipping_element):
     """Concrete class for tipping_elements following the dynamics of a
-    Hopfbifurcation"""
+    Hopfbifurcation.
+    Implementation using a representation with polar coordinates:
+    dr/dt=(bif_par-r^2)*r*a, dphi/dt=b (time-dependence of angle)"""
+
     def __init__(self, id_number, a, b):
         """Constructor with additional parameters for (half a) Hopf
         element"""
@@ -67,8 +76,13 @@ class hopf(tipping_element):
 
     def dxdt_diag(self):
         """returns callable of dx/dt diagonal element of Hopf element"""
-        return lambda bif_par, x: -self._a*pow(x,3)+self._a*bif_par*x
+        return lambda t, bif_par, r: (bif_par-pow(r,2))*r*self._a
 
     def jac_diag(self):
         """returns callable jacobian diagonal element of Hopf"""
-        return lambda bif_par, x: -3*self._a*pow(x,2)+self._a*bif_par
+        return lambda t, bif_par, r: self._a*bif_par-self._a*3*pow(r,2)
+
+    """method needed???"""
+    def get_b(self):
+        """ODE of angle (polar coordinates): domega/dt=b Hence, angle=t*b"""
+        return self._b
