@@ -27,12 +27,12 @@ class evolve():
     def f(self,t,x):
         f = np.zeros(len(x))
         for idx in range(0,len(x)):
-            f[idx] = self.dxdt["diag"][idx].__call__( 
+            f[idx] = self.dxdt["diag"][idx].__call__( t,
                          self.bif_par_func.__call__(t,len(x))[idx] 
                        + self.bif_par_arr[idx], x[idx] )
             
             for cpl in self.dxdt["cpl"][idx]:
-                f[idx] += cpl[2].__call__( x[cpl[0]] , x[idx] )
+                f[idx] += cpl[2].__call__( t, x[cpl[0]] , x[idx] )
         return f
     
     def jac(self,t,x):
@@ -40,11 +40,11 @@ class evolve():
         
         for row_idx in range(0,len(x)):
             for col_idx in range(0,len(x)):
-                jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__( 
+                jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__(  t,
                                             x[col_idx] , x[row_idx] )
         
         for idx in range(0,len(x)):
-            jac[idx,idx] = self.jac_dict["diag"][idx].__call__(
+            jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
                                 self.bif_par_func.__call__(t,len(x))[idx] 
                                 + self.bif_par_arr[idx] , x[idx] )
 

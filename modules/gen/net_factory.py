@@ -107,14 +107,12 @@ def create_ring(number,a,b,initial_state,cpl_strength):
 
     return net
 
-def create_erdos_renyi(
-    num,average_degree,a,b,initial_state,cpl_strength,
-    negative_coupling=False,seed=None
-    ):
-    prob = average_degree/(num-1)
-    net = nx.erdos_renyi_graph(num, prob,seed=seed,directed=True)
+def create_erdos_renyi( num, link_probability, a, b, cpl_strength
+                      , negative_coupling=False, seed=None ):
+    
+    net = nx.erdos_renyi_graph(num, link_probability, seed=seed, directed=True)
     net.__class__ = tipping_network
-    tc = cusp
+    
     for id in net.nodes():
         tc = cusp(id,a,b)
         net.node[id]['data'] = tc
@@ -122,12 +120,15 @@ def create_erdos_renyi(
     for id in net.edges():
         if negative_coupling:
             if randint(0,1):
-                net.edges[id]['weight'] = cpl_strength
+                cpl = linear_coupling(cpl_strength)
+                net.edges[id]['data'] = cpl
             else:
-                net.edges[id]['weight'] = -cpl_strength
+                cpl = linear_coupling(-cpl_strength)
+                net.edges[id]['data'] = -cpl_strength
         else:
-            net.edges[id]['weight'] = cpl_strength
-    
+            cpl = linear_coupling(cpl_strength)
+            net.edges[id]['data'] = cpl
+
     return net
 
 def create_watts_strogatz(
@@ -137,7 +138,7 @@ def create_watts_strogatz(
     net = nx.connected_watts_strogatz_graph(num,average_degree,rewiring_probability,
 					tries=tries, seed=seed)
     net.__class__ = tipping_network
-    tc = cusp
+
     for id in net.nodes():
         tc = cusp(id,a,b)
         net.node[id]['data'] = tc

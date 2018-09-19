@@ -21,7 +21,7 @@ class tipping_network(DiGraph):
         for idx in range(0,n):
             jac_diag.append(self.node[idx]['data'].jac_diag())
         
-        jac_cpl = [[lambda x1,x2: 0 for j in range(n)] for i in range(n)]
+        jac_cpl = [[lambda t,x1,x2: 0 for j in range(n)] for i in range(n)]
         for edge in self.edges():
             jac_cpl[edge[1]][edge[1]] = self.get_edge_data(edge[0]
                                                 ,edge[1])['data'].jac_diag()
@@ -41,7 +41,7 @@ class tipping_network(DiGraph):
                 if not self.get_edge_data(from_id,to_id) == None:
                     cpl_val = self.get_edge_data(
                                         from_id,to_id)['data'].dxdt_cpl()
-                    cpl_sum += -cpl_val.__call__( initial_state[from_id] 
+                    cpl_sum += -cpl_val.__call__( 0 , initial_state[from_id] 
                                                 , initial_state[to_id] )
             
             bif_par_vec.append(cpl_sum)

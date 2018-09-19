@@ -47,8 +47,8 @@ class cusp(tipping_element):
         
     def dxdt_diag(self):
         """returns callable of dx/dt diagonal element of cusp"""
-        return lambda par,x : self.a*pow(x,3) + self.b*x + par
+        return lambda t, par, x : self.a*pow(x,3) + self.b*x + par
     
     def jac_diag(self):
         """returns callable jacobian diagonal element of cusp."""
-        return lambda par,x : 3*self.a*pow(x,2) + self.b
+        return lambda t, par, x : 3*self.a*pow(x,2) + self.b
