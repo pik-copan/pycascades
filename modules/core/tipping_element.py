@@ -51,24 +51,24 @@ class cusp(tipping_element):
         return lambda par,x : self.a*pow(x,3) + self.b*x + par
     
     def jac_diag(self):
-        """returns callable jacobian diagonal element of cusp."""
+        """returns callable jacobian diagonal element of cusp"""
         return lambda par,x : 3*self.a*pow(x,2) + self.b
 
 
 class hopf(tipping_element):
     """Concrete class for tipping_elements following the dynamics of a
     Hopfbifurcation"""
-    def __init__(self, id_number, a, b, bif_par):
-        self._id = id
+    def __init__(self, id_number, a, b):
+        """Constructor with additional parameters for (half a) Hopf
+        element"""
+        tipping_element.__init__(self, id_number)
         self._a = a
         self._b = b
-        self._bif_par = bif_par
 
-    def dxdt(self,x):
-        """One half of a Hopfbifurcation"""
-        return -self._a*pow(x,3)+self._a*self._bif_par*x
+    def dxdt_diag(self):
+        """returns callable of dx/dt diagonal element of Hopf element"""
+        return lambda bif_par, x: -self._a*pow(x,3)+self._a*bif_par*x
 
-    def jac(self,x):
-        """Method returns the derivative of dx/dt with respect to x evoluated
-        at commited value x"""
-        return -3*self._a*pow(x,2)+self._a*self._bif_par
+    def jac_diag(self):
+        """returns callable jacobian diagonal element of Hopf"""
+        return lambda bif_par, x: -3*self._a*pow(x,2)+self._a*bif_par

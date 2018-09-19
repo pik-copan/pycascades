@@ -58,6 +58,13 @@ class hopf_coupling(coupling):
         self._to = _to
         self._from = _from
 
+    def dxdt_cpl(self):
+        return lambda x_from, x_to : -self.a*pow(x_from,2)*x_to+self.b*x_from
+
+    def jac_clp(self):
+        # not symmetric coupling! und nu?
+        # was ist mit init, coupling? und Parametern?
+
     def coupling(self, x_1, x_2, a, b):
         """Method returns coupling from Hopf tipping_element x_1 to Hopf
         tipping_element x_2: -a*x_1^2*x_2+b*x_1"""
