@@ -20,4 +20,7 @@ class linear_coupling:
     def jac_cpl(self):
         """Returns callable for the jacobian coupling matrix element."""
         return lambda x_from , x_to : self.strength
+    
+    def jac_diag(self):
+        return lambda x_from , x_to : 0
 		

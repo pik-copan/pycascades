@@ -1,8 +1,0 @@
-cache
-modules/core/*.pyc
-modules/core/__pycache__
-modules/gen/*.pyc
-modules/gen/__pycache__
-modules/cascades/*.pyc
-modules/cascades/__pycache__
-scripts/*
