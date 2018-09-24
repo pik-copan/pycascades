@@ -2,7 +2,7 @@ from core.tipping_element import cusp
 from core.coupling import linear_coupling
 from core.tipping_network import tipping_network
 
-from random import randint
+from random import uniform,randint
 
 import networkx as nx
 
@@ -107,8 +107,8 @@ def create_ring(number,a,b,initial_state,cpl_strength):
 
     return net
 
-def create_erdos_renyi( num, link_probability, a, b, cpl_strength
-                      , negative_coupling=False, seed=None ):
+def create_erdos_renyi( num, link_probability, a, b, cpl_strength_list
+                      , negative_probability=0.0, seed=None ):
     
     net = nx.erdos_renyi_graph(num, link_probability, seed=seed, directed=True)
     net.__class__ = tipping_network
@@ -118,15 +118,12 @@ def create_erdos_renyi( num, link_probability, a, b, cpl_strength
         net.node[id]['data'] = tc
     
     for id in net.edges():
-        if negative_coupling:
-            if randint(0,1):
-                cpl = linear_coupling(cpl_strength)
-                net.edges[id]['data'] = cpl
-            else:
-                cpl = linear_coupling(-cpl_strength)
-                net.edges[id]['data'] = -cpl_strength
-        else:
+        cpl_strength = cpl_strength_list[randint(0,len(cpl_strength_list)-1)]
+        if uniform(0.0,1.0) > negative_probability:
             cpl = linear_coupling(cpl_strength)
+            net.edges[id]['data'] = cpl
+        else:
+            cpl = linear_coupling(-cpl_strength)
             net.edges[id]['data'] = cpl
 
     return net
@@ -145,7 +142,7 @@ def create_watts_strogatz(
     
     for id in net.edges():
         if negative_coupling:
-            if randint(0,1):
+            if uniform(0.0,1):
                 net.edges[id]['weight'] = cpl_strength
                 cpl = linear_coupling(cpl_strength)
                 net.edges[id]['data'] = cpl

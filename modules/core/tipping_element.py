@@ -36,6 +36,9 @@ class tipping_element:
         the special form of the tipping element.
         """
         return lambda par,x: 0
+    
+    def get_tip_state(self):
+        return lambda x : 0
 
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
@@ -52,3 +55,6 @@ class cusp(tipping_element):
     def jac_diag(self):
         """returns callable jacobian diagonal element of cusp."""
         return lambda t, par, x : 3*self.a*pow(x,2) + self.b
+    
+    def get_tip_state(self):
+        return lambda x : 0

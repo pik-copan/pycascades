@@ -5,23 +5,19 @@ Created on Thu Sep 13 16:48:10 2018
 
 @author: jonathan
 """
-
-import pickle
-import os
+import numpy as np
 
 from core.evolve import evolve
-from cascades.cascade_data import cascade_data
+from core.evolve import NoEquilibrium
 
-class NoEquilibrium(Exception):
-    pass
-
-def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , outfile ):
+def tip( net , initial_state , bif_par_arr , bif_par_func ):
     
-    net_ev = evolve( tipping_network , initial_state , bif_par_arr , bif_par_func )
+    net_ev = evolve( net , initial_state , bif_par_arr , bif_par_func )
+    
     tolerance = 0.005
     t_step = 0.1
     save = True
-    realtime_break = 30
+    realtime_break = 100
     
     if not net_ev.is_fixed_point(tolerance):
         print("Warning: Initial state is not a fixed point of the system")
@@ -32,23 +28,9 @@ def tip( info , tipping_network , initial_state , bif_par_arr , bif_par_func , o
         try:
             net_ev.equilibrate(tolerance,t_step,save,realtime_break)
         except NoEquilibrium:
-            print("No equilibrium found " \
-                  "in "+str(realtime_break)+" realtime seconds."\
-                  " Increase tolerance or breaktime.")
-            break
-   
-    if os.path.exists(outfile):
-        file = open( outfile , 'rb' )
-        c_data = pickle.load(file)
-    else:
-        c_data = cascade_data()
-
-    c_data.add_cascade( info , tipping_network , net_ev.number_tipped() ,
-                        net_ev.times , net_ev.pars , net_ev.states )
+            return np.nan
     
-    file = open( outfile , 'wb' )
-    pickle.dump( c_data , file )
-    
+    return net_ev.number_tipped()
     
 """
 TODO: Integrate get_critical_par method, that was initially in
