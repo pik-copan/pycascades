@@ -14,7 +14,8 @@ class tipping_element:
 
     def __init__(self,id_number):
         """Constructor"""
-        self.id = id_number
+        self._id = id_number
+        self._type = None
 
         """dx/dt and jacobian diagonal element of tipping element. 
         This method should be overwritten from the 
@@ -39,16 +40,19 @@ class tipping_element:
         return lambda par,x: 0
 
     """ method added by Doro"""
-    def get_b(self):
-        print('Warning: Either use of abstract tipping_element which is not '
-              'recommended or function has not been overwritten.')
-        return 1
+
+    def get_type(self):
+        return self._type
+
+    def get_id(self):
+        return self._id
 
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
     def __init__(self, id_number, a, b ):
         """Constructor with additional parameters for cusp"""
         tipping_element.__init__(self,id_number)
+        self._type = 'cusp'
         self.a = a
         self.b = b
         
@@ -71,6 +75,7 @@ class hopf(tipping_element):
         """Constructor with additional parameters for (half a) Hopf
         element"""
         tipping_element.__init__(self, id_number)
+        self._type = 'hopf'
         self._a = a
         self._b = b
 
@@ -82,7 +87,6 @@ class hopf(tipping_element):
         """returns callable jacobian diagonal element of Hopf"""
         return lambda t, bif_par, r: self._a*bif_par-self._a*3*pow(r,2)
 
-    """method needed???"""
     def get_b(self):
         """ODE of angle (polar coordinates): domega/dt=b Hence, angle=t*b"""
         return self._b

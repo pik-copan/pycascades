@@ -55,17 +55,10 @@ class linear_coupling(coupling):
 class cusp_to_hopf(coupling):
     """Class for coupling """
 
-    def __init__(self, _from, _to, a, strength):
+    def __init__(self, _from, _to, a_hopf, strength):
         coupling.__init__(self, _from, _to)
         self._strength = strength
-        self._a = a
-
-    #
-    # def __init__(self, _from, _to, a, strength):
-    #     """Constructor"""
-    #     coupling.__init__(_from, _to)
-    #     self._strength = strength
-    #     self._a = a
+        self._a = a_hopf
 
     def dxdt_cpl(self):
         """coupling"""
@@ -83,11 +76,10 @@ class cusp_to_hopf(coupling):
 class hopf_x_to_cusp(coupling):
     """Class for coupling """
 
-    def __init__(self, _from, _to, a, b, strength):
+    def __init__(self, _from, _to, b_hopf, strength):
         """Constructor"""
         coupling.__init__(self, _from, _to)
-        self._a = a
-        self._b = b
+        self._b = b_hopf
         self._strength = strength
 
     def dxdt_cpl(self):
@@ -98,7 +90,6 @@ class hopf_x_to_cusp(coupling):
     def jac_cpl(self):
         """partial derivative of dxdt with respect to r_from"""
         return lambda t, r_from, x_to : self._strength*math.cos(self._b*t)
-        # return lambda t, r_from, x_to: self._strength
 
     def jac_diag(self):
         """partial derivative with respect to x_to"""
@@ -110,11 +101,9 @@ class hopf_x_to_cusp(coupling):
 class hopf_y_to_cusp(coupling):
     """Class for coupling """
 
-    def __init__(self, _from, _to, a, b, strength):
+    def __init__(self, _from, _to, b_hopf, strength):
         """Constructor"""
-        coupling.__init__(self, _from, _to)
-        self._a = a
-        self._b = b
+        self._b = b_hopf
         self._strength = strength
 
     def dxdt_cpl(self):
@@ -125,7 +114,6 @@ class hopf_y_to_cusp(coupling):
     def jac_cpl(self):
         """partial derivative of dxdt with respect to r_from"""
         return lambda t, r_from, x_to : self._strength*math.sin(self._b*t)
-        # return lambda t, r_from, x_to : self._strength
 
     def jac_diag(self):
         """partial derivative with respect to x_to"""
@@ -149,7 +137,6 @@ class hopf_x_to_hopf(coupling):
     def jac_cpl(self):
         return lambda t, r_from, r_to : self._a_to*r_to*self._strength*\
                                       math.cos(self._b_from*t)
-        # return lambda t, r_from, r_to : self._a_to*r_to*self._strength
 
     def jac_diag(self):
         return lambda t, r_from, r_to : self._a_to*self._strength*r_from*\
@@ -174,7 +161,6 @@ class hopf_y_to_hopf(coupling):
     def jac_cpl(self):
         return lambda t, r_from, r_to: self._a_to*r_to*self._strength*\
                                      math.sin(self._b_from * t)
-        # return lambda t, r_from, r_to: self._a_to*r_to*self._strength
 
     def jac_diag(self):
         return lambda t, r_from, r_to: self._a_to*self._strength*r_from*\

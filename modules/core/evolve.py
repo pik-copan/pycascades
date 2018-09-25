@@ -24,8 +24,7 @@ class evolve():
         self.states = []
         self.save_state()
         self.init_tip_state = self.get_tip_state()
-        # added by Doro
-        self._projection_func = tipping_network.get_projections()
+
 
 
     def f(self,t,x):
@@ -46,11 +45,16 @@ class evolve():
             for col_idx in range(0,len(x)):
                 jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__(  t,
                                             x[col_idx] , x[row_idx] )
-        
+
         for idx in range(0,len(x)):
-            jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
-                                self.bif_par_func.__call__(t,len(x))[idx] 
+            # jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
+            #                     self.bif_par_func.__call__(t,len(x))[idx]
+            #                     + self.bif_par_arr[idx] , x[idx] )
+            jac[idx,idx] = self.jac_dict["diag"][idx].__call__( t,
+                                self.bif_par_func.__call__(t,len(x))[idx]
                                 + self.bif_par_arr[idx] , x[idx] )
+            for idy in range(0,len(x)):
+                jac[idx,idx] += self.jac_dict["diag_add"][idx][idy].__call__(t, x[idy], x[idx])
 
         return jac
                             
