@@ -14,6 +14,7 @@ class evolve():
         self.dims = len(self.dxdt)
         self.jac_dict = tipping_network.get_jac()
         self.r = ode(self.f,self.jac).set_integrator('vode', method='adams')
+        # array of functions changing respective bifurcation parameter
         self.bif_par_func = bif_par_func
         self.bif_par_arr = bif_par_arr
         
@@ -31,6 +32,7 @@ class evolve():
         f = np.zeros(len(x))
         for idx in range(0,len(x)):
             f[idx] = self.dxdt["diag"][idx].__call__( t,
+                         self.bif_par_func.__call__(t,len(x))[idx]  +
                          bif_par_arr[idx], x[idx] )
             
             for cpl in self.dxdt["cpl"][idx]:
@@ -44,10 +46,13 @@ class evolve():
             for col_idx in range(0,len(x)):
                 jac[row_idx,col_idx] = self.jac_dict["cpl"][row_idx][col_idx].__call__(  t,
                                             x[col_idx] , x[row_idx] )
-        
+
         for idx in range(0,len(x)):
-            jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
-                                bif_par_arr[idx] , x[idx] )
+            jac[idx,idx] = self.jac_dict["diag"][idx].__call__( t,
+                                self.bif_par_func.__call__(t,len(x))[idx]
+                                + self.bif_par_arr[idx] , x[idx] )
+            for idy in range(0,len(x)):
+                jac[idx,idx] += self.jac_dict["diag_add"][idx][idy].__call__(t, x[idy], x[idx])
 
         return jac
                             

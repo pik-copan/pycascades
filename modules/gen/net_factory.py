@@ -1,5 +1,6 @@
 from core.tipping_element import cusp
-from core.coupling import linear_coupling
+from core.tipping_element import hopf
+from core.coupling import *
 from core.tipping_network import tipping_network
 
 from random import uniform,randint
@@ -155,4 +156,46 @@ def create_watts_strogatz(
             cpl = linear_coupling(cpl_strength)
             net.edges[id]['data'] = cpl
     
+    return net
+
+def one_hopf_one_cusp(a_hopf, b_hopf, a_cusp, b_cusp, strength_hopf_to_cusp=0, strength_cusp_to_hopf=0):
+    net = tipping_network()
+    hopf1 = hopf(0, a_hopf, b_hopf)
+    cusp1 = cusp(1, a_cusp, b_cusp)
+    net.add_node(0, data=hopf1)
+    net.add_node(1, data=cusp1)
+    if strength_hopf_to_cusp != 0:
+        cpl_h_c = hopf_x_to_cusp(0,1, b_hopf, strength_hopf_to_cusp)
+        net.add_edge(0,1,data=cpl_h_c)
+    if strength_cusp_to_hopf != 0:
+        cpl_c_h = cusp_to_hopf(1,0,a_hopf,strength_cusp_to_hopf)
+        net.add_edge(1,0,data=cpl_c_h)
+    return net
+
+def two_hopf(a_1, b_1, a_2, b_2, cpl_strength_1_to_2=0, cpl_strength_2_to_1=0):
+    net = tipping_network()
+    hopf1 = hopf(0, a_1, b_1)
+    hopf2 = hopf(1, a_2, b_2)
+    net.add_node(0, data=hopf1)
+    net.add_node(1, data=hopf2)
+    if cpl_strength_1_to_2 != 0:
+        cpl_1 = hopf_x_to_hopf(0, 1, a_2, b_1, cpl_strength_1_to_2)
+        net.add_edge(0, 1, data=cpl_1)
+    if cpl_strength_2_to_1 != 0:
+        cpl2 = hopf_x_to_hopf(1, 0, a_1, b_2, cpl_strength_2_to_1)
+        net.add_edge(1, 0, data=cpl2)
+    return net
+
+def two_cusp(a_1, b_1, a_2, b_2, cpl_1_to_2=0, cpl_2_to_1=0):
+    net = tipping_network()
+    cusp1 = cusp(0, a_1, b_1)
+    cusp2 = cusp(1, a_2, b_2)
+    net.add_node(0, data=cusp1)
+    net.add_node(1, data=cusp2)
+    if cpl_1_to_2 != 0:
+        cpl_1 = linear_coupling(cpl_1_to_2)
+        net.add_edge(0, 1, data=cpl_1)
+    if cpl_2_to_1 != 0:
+        cpl_2 = linear_coupling(cpl_2_to_1)
+        net.add_edge(1, 0, data=cpl_2)
     return net

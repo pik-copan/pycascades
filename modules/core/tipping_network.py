@@ -1,6 +1,20 @@
 from networkx import DiGraph
 
 class tipping_network(DiGraph):
+
+    def __init__(self, incoming_graph_data=None, **attr):
+        DiGraph.__init__(self, incoming_graph_data=None, **attr)
+        self._node_types = {}
+        self._hopf_dict = {}
+
+    def add_node(self, node_for_adding, **attr):
+
+        super().add_node(node_for_adding, **attr)
+        self._node_types.update({node_for_adding : attr['data'].get_type()})
+
+        if attr['data'].get_type() == 'hopf':
+            self._hopf_dict.update({attr['data'].get_id() : attr['data'].get_b()})
+
     
     def get_dxdt(self):
         dxdt_diag = []
@@ -22,13 +36,13 @@ class tipping_network(DiGraph):
             jac_diag.append(self.node[idx]['data'].jac_diag())
         
         jac_cpl = [[lambda t,x1,x2: 0 for j in range(n)] for i in range(n)]
+        jac_diag_add = [[lambda t,x1,x2: 0 for j in range(n)] for i in range(n)]
         for edge in self.edges():
-            jac_cpl[edge[1]][edge[1]] = self.get_edge_data(edge[0]
-                                                ,edge[1])['data'].jac_diag()
+            jac_diag_add[edge[1]][edge[0]] = self.get_edge_data(edge[0],
+                                                    edge[1])['data'].jac_diag()
             jac_cpl[edge[1]][edge[0]] = self.get_edge_data(edge[0]
                                                 ,edge[1])['data'].jac_cpl()
-        
-        return { "diag" : jac_diag , "cpl" : jac_cpl }
+        return { "diag" : jac_diag , "cpl" : jac_cpl , "diag_add" : jac_diag_add}
             
     def get_adjusted_bif_par_vec( self , bif_par_eff_vec , initial_state ):
         """Adjust bifurcation parameter so that the sum of coupling and
@@ -46,4 +60,4 @@ class tipping_network(DiGraph):
             
             bif_par_vec.append(cpl_sum)
         return bif_par_vec
-    
+
