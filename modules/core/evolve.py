@@ -16,6 +16,7 @@ class evolve():
         # array of functions changing respective bifurcation parameter
         self.bif_par_func = bif_par_func
         self.bif_par_arr = bif_par_arr
+        self.impact_of_other_nodes = tipping_network.compute_impact_matrix()
         
         # Initialize state
         self.r.set_initial_value(initial_state,0)
@@ -47,9 +48,6 @@ class evolve():
                                             x[col_idx] , x[row_idx] )
 
         for idx in range(0,len(x)):
-            # jac[idx,idx] += self.jac_dict["diag"][idx].__call__( t,
-            #                     self.bif_par_func.__call__(t,len(x))[idx]
-            #                     + self.bif_par_arr[idx] , x[idx] )
             jac[idx,idx] = self.jac_dict["diag"][idx].__call__( t,
                                 self.bif_par_func.__call__(t,len(x))[idx]
                                 + self.bif_par_arr[idx] , x[idx] )
@@ -73,6 +71,7 @@ class evolve():
         
     def get_tip_state(self):
         """Calculate binary array of tip states"""
+        # needs to be changes for general bifurcation types
         return np.array(self.states[-1]) > 0
     
     def number_tipped(self):
@@ -122,3 +121,16 @@ class evolve():
             return True
         else:
             return False
+
+    def bif_impact_of_other_nodes (self, t, x, impact_on_id):
+        impact = 0
+        # print(self.impact_of_other_nodes[impact_on_id])
+        for node in range(len(self.bif_par_arr)):
+            impact += self.impact_of_other_nodes[impact_on_id][node].__call__(t,x[node],x[impact_on_id])
+
+
+        # for edge in self.impact_of_other_nodes[impact_on_id]:
+        #     # print(edge_)
+        #     print(edge[2].__call__(t,x[edge[0]],x[edge[1]]))
+        #     impact += edge[2].__call__(t,x[edge[0]],x[edge[1]])
+        return impact

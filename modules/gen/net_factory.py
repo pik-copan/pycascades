@@ -12,7 +12,7 @@ import networkx as nx
    Warning: Functions could be outdated and might have to be
    updated to make them work!!!"""
 
-def create_one_cusp(a,b,initial_state):
+def create_one_cusp(a,b, initial_state):
     tc0 = cusp(0,a,b)
     net = tipping_network()
     net.add_node(0,data=tc0)
@@ -161,18 +161,24 @@ def create_watts_strogatz(
     
     return net
 
-def one_hopf_one_cusp(a_hopf, b_hopf, a_cusp, b_cusp, strength_hopf_to_cusp=0, strength_cusp_to_hopf=0):
+def one_hopf(a,b):
     net = tipping_network()
-    hopf1 = hopf(0, a_hopf, b_hopf)
-    cusp1 = cusp(1, a_cusp, b_cusp)
-    net.add_node(0, data=hopf1)
-    net.add_node(1, data=cusp1)
+    hopf_elem = hopf(0,a,b)
+    net.add_node(0,data=hopf_elem)
+    return net
+
+def one_hopf_one_cusp(a_hopf, b_hopf, a_cusp, b_cusp, hopf_id=0, cusp_id=1, strength_hopf_to_cusp=0, strength_cusp_to_hopf=0):
+    net = tipping_network()
+    hopf1 = hopf(hopf_id, a_hopf, b_hopf)
+    cusp1 = cusp(cusp_id, a_cusp, b_cusp)
+    net.add_node(hopf_id, data=hopf1)
+    net.add_node(cusp_id, data=cusp1)
     if strength_hopf_to_cusp != 0:
-        cpl_h_c = hopf_x_to_cusp(0,1, b_hopf, strength_hopf_to_cusp)
-        net.add_edge(0,1,data=cpl_h_c)
+        cpl_h_c = hopf_x_to_cusp(hopf_id,cusp_id, b_hopf, strength_hopf_to_cusp)
+        net.add_edge(hopf_id,cusp_id,data=cpl_h_c)
     if strength_cusp_to_hopf != 0:
-        cpl_c_h = cusp_to_hopf(1,0,a_hopf,strength_cusp_to_hopf)
-        net.add_edge(1,0,data=cpl_c_h)
+        cpl_c_h = cusp_to_hopf(cusp_id,hopf_id,a_hopf,strength_cusp_to_hopf)
+        net.add_edge(cusp_id,hopf_id,data=cpl_c_h)
     return net
 
 def two_hopf(a_1, b_1, a_2, b_2, cpl_strength_1_to_2=0, cpl_strength_2_to_1=0):
