@@ -35,8 +35,11 @@ class linear_coupling(coupling):
     The coupling consists of a factor (strength) and a coupling element.
     """
 
-    def __init__(self,strength):
+    def __init__(self, origin, to, strength):
         """Constructor"""
+        coupling.__init__(self, origin, to)
+        self._from = origin
+        self._to = to
         self.strength = strength
         
     def dxdt_cpl(self):
