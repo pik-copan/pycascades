@@ -2,18 +2,17 @@ from networkx import DiGraph
 
 class tipping_network(DiGraph):
 
-    def __init__(self, incoming_graph_data=None, **attr):
-        DiGraph.__init__(self, incoming_graph_data=None, **attr)
-        self._node_types = {}
-        self._hopf_dict = {}
+    def __init__( self, incoming_graph_data=None, **attr):
+        DiGraph.__init__( self, incoming_graph_data=None, **attr)
 
-    def add_node(self, node_for_adding, **attr):
 
-        super().add_node(node_for_adding, **attr)
-        self._node_types.update({node_for_adding : attr['data'].get_type()})
+    def add_element( self, node):
+        ind = self.number_of_nodes()
+        super().add_node( ind, data = node)
 
-        if attr['data'].get_type() == 'hopf':
-            self._hopf_dict.update({attr['data'].get_id() : attr['data'].get_b()})
+
+    def add_coupling( self, from_id, to_id, coupling):
+        super().add_edge( from_id, to_id, data = coupling)
 
     
     def get_dxdt(self):

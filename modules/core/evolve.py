@@ -112,9 +112,8 @@ class evolve():
         """Check if the system is in an equilibrium state, e.g. if the 
         absolute value of all elements of f_prime is less than tolerance. 
         If True the state can be considered as close to a fixed point"""
-        fix = np.less(np.abs(self.f(self.r.t,self.r.y,self.bif_par_arr))
-                     ,tolerance*np.ones((1
-                     ,len(self.pars[-1]))))
+        fix = np.less( np.abs( self.f( self.r.t, self.r.y, self.bif_par_arr))
+                     , tolerance*np.ones( ( 1, len(self.pars[-1]))))
         if fix.all():
             return True
         else:

@@ -4,7 +4,6 @@ Provides classes for tipping_element objects
 """
 
 
-
 class tipping_element:
     """Abstract tipping_element class
     This class provides the interface for tipping_element classes.
@@ -12,9 +11,8 @@ class tipping_element:
     tipping_element classes.
     """
 
-    def __init__(self,id_number):
+    def __init__(self):
         """Constructor"""
-        self._id = id_number
         self._type = None
 
         """dx/dt and jacobian diagonal element of tipping element. 
@@ -22,7 +20,12 @@ class tipping_element:
         concrete tipping_element classes to implement
         the special form of the tipping element.
         """
-        
+    
+    
+    def get_type(self):
+        return self._type
+  
+    
     def dxdt_diag(self):
         """dx/dt diagonal element of tipping element. 
         This method should be overwritten from the 
@@ -42,22 +45,15 @@ class tipping_element:
     def get_tip_state(self):
         return lambda x : 0
 
-    """ method added by Doro"""
-
-    def get_type(self):
-        return self._type
-
-    def get_id(self):
-        return self._id
 
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
-    def __init__(self, id_number, a, b ):
+    def __init__(self, a, b ):
         """Constructor with additional parameters for cusp"""
-        tipping_element.__init__(self,id_number)
+        super().__init__()
         self._type = 'cusp'
-        self.a = a
-        self.b = b
+        self._a = a
+        self._b = b
         
     def dxdt_diag(self):
         """returns callable of dx/dt diagonal element of cusp"""
@@ -76,10 +72,10 @@ class hopf(tipping_element):
     Implementation using a representation with polar coordinates:
     dr/dt=(bif_par-r^2)*r*a, dphi/dt=b (time-dependence of angle)"""
 
-    def __init__(self, id_number, a, b):
+    def __init__(self, a, b):
         """Constructor with additional parameters for (half a) Hopf
         element"""
-        tipping_element.__init__(self, id_number)
+        super().__init__()
         self._type = 'hopf'
         self._a = a
         self._b = b

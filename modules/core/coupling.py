@@ -13,18 +13,19 @@ class coupling:
     Class should not be used but rather be inherited from by concrete coupling
     classes."""
 
-    def __init__(self, origin, to):
-        self._from = origin
-        self._to = to
+    def __init__(self):
+        pass
 
-    def coupling(self, x_1, x_2):
-        """Method computes the effect of x_1 on x_2, thus implements the
-        coupling from x_1 to x_2.
-        The method should be overwritten by concrete a tipping_element class
-        to implement the respective coupling between two elements."""
-        print('Warning: Either the abstract class is used which is not' +
-              'recommented or the method coupling() has not been overwritten')
-        return 0.0
+    def dxdt_cpl(self):
+        """Returns callable for the coupling term of dxdt."""
+        return lambda t, x_from , x_to : 0
+    
+    def jac_cpl(self):
+        """Returns callable for the jacobian coupling matrix element."""
+        return lambda t, x_from , x_to : 0
+    
+    def jac_diag(self):
+        return lambda t, x_from , x_to : 0
 
     def projection(self):
         return lambda t : 1
@@ -35,11 +36,9 @@ class linear_coupling(coupling):
     The coupling consists of a factor (strength) and a coupling element.
     """
 
-    def __init__(self, origin, to, strength):
+    def __init__(self, strength):
         """Constructor"""
-        coupling.__init__(self, origin, to)
-        self._from = origin
-        self._to = to
+        coupling.__init__(self)
         self.strength = strength
         
     def dxdt_cpl(self):
