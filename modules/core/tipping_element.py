@@ -91,3 +91,6 @@ class hopf(tipping_element):
     def get_b(self):
         """ODE of angle (polar coordinates): domega/dt=b Hence, angle=t*b"""
         return self._b
+
+    def get_a(self):
+        return self._a

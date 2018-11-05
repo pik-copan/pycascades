@@ -24,6 +24,7 @@ coupling_1 = linear_coupling(strength = 0.2)
 
 """Create a tipping network and add the created elements"""
 from core.tipping_network import tipping_network
+
 net = tipping_network()
 
 """tipping_network is derived from networkx DiGraph class and all its methods
@@ -36,6 +37,7 @@ net.add_coupling(1,0,coupling_1)
 """You can plot the network with the plot_network function from utils module"""
 from utils import plotter
 plotter.network(net)
+
 
 """Look up the gen.net_factory module for some predefined
 network generation functions and the core.evolve and 
