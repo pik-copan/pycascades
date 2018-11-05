@@ -13,13 +13,13 @@ tipping network.
 
 """Create two cusp tipping elements"""
 from core.tipping_element import cusp
-cusp_element_0 = cusp(a=-1,b=1)
-cusp_element_1 = cusp(a=-1,b=2)
+cusp_element_0 = cusp( a = -1, b = 1, c = 0 )
+cusp_element_1 = cusp( a = -1, b = 1, c = 0 )
 
 """Create two linear couplings with strength 0.15 and 0.2"""
 from core.coupling import linear_coupling
-coupling_0 = linear_coupling(strength = 0.15)
-coupling_1 = linear_coupling(strength = 0.2)
+coupling_0 = linear_coupling( strength = 0.15 )
+coupling_1 = linear_coupling( strength = 0.2 )
 
 
 """Create a tipping network and add the created elements"""
@@ -29,10 +29,10 @@ net = tipping_network()
 
 """tipping_network is derived from networkx DiGraph class and all its methods
 can be used, too."""
-net.add_element(cusp_element_0)
-net.add_element(cusp_element_1)
-net.add_coupling(0,1,coupling_0)
-net.add_coupling(1,0,coupling_1)
+net.add_element( cusp_element_0 )
+net.add_element( cusp_element_1 )
+net.add_coupling( 0, 1, coupling_0 )
+#net.add_coupling( 1, 0, coupling_1 )
 
 """You can plot the network with the plot_network function from utils module"""
 from utils import plotter
