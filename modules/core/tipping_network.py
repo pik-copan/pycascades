@@ -61,3 +61,20 @@ class tipping_network(DiGraph):
             bif_par_vec.append(cpl_sum)
         return bif_par_vec
 
+    def get_hopf_dict(self):
+        return self._hopf_dict
+
+    def get_node_types(self):
+        return self._node_types
+
+    def compute_impact_matrix(self):
+        n = self.number_of_nodes()
+        impact_matrix = [[lambda t, x1, x2: 0 for j in range(n)] for i in range(n)]
+        for edge in self.edges.data():
+            print(edge[2]['data'].bif_impact())
+            impact_matrix[edge[1]][edge[0]]=edge[2]['data'].bif_impact()
+            # if self.get_node_types()[edge[1]]=='cusp':
+            #     impact_matrix[edge[1]][edge[0]]=edge['data'].dxdt_cpl()
+            # elif self.get_node_types()[edge[1]]=='hopf':
+            #     impact_matrix[edge[1]][edge[0]]=edge['data']
+        return impact_matrix
