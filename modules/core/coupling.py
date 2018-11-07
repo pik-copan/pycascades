@@ -1,4 +1,3 @@
-import math
 """coupling module
 
 Provides classes for couplings.
@@ -6,7 +5,7 @@ Note that a coupling consists of two elements. The active element (called
 coupling element here) affects the passive element (called coupled 
 element here).
 """
-
+import math
 
 class coupling:
     """Abstract class for coupling of two tipping_elements

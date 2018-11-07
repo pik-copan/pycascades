@@ -28,6 +28,9 @@ class tipping_element:
     def get_par(self):
         return self._par
     
+    def set_par(self, key, val):
+        self._par[key] = val
+    
     def dxdt_diag(self):
         """dx/dt diagonal element of tipping element. 
         This method should be overwritten from the 

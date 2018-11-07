@@ -1,12 +1,10 @@
 from networkx import DiGraph
-from scipy.sparse import coo_matrix
 import numpy as np
        
 class tipping_network(DiGraph):
 
     def __init__( self, incoming_graph_data=None, **attr):
         DiGraph.__init__( self, incoming_graph_data=None, **attr)
-        self.dxdt = coo_matrix((0,0))
         self.dxdt = { "diag" : [] , "cpl" : [] }
         self.jac_dict  = { "diag" : [] , "diag_add" : [] , "cpl" : [] }
 
@@ -23,7 +21,21 @@ class tipping_network(DiGraph):
         self.jac_dict['cpl'].append( (from_id, to_id, coupling.jac_cpl()) )
         self.jac_dict['diag_add'].append ( ( from_id, to_id, coupling.jac_diag() ) )
 
-    def f( self, t, x):
+    def set_param( self, node_id, key, val ):
+        element = self.node[node_id]['data']
+        element.set_par( key, val)
+        self.dxdt['diag'][node_id] = element.dxdt_diag()
+        self.jac_dict['diag'][node_id] = element.jac_diag()
+        """Update couplings to be faster"""
+        
+    def get_tip_states( self, x):
+        tip_state = [self.node[node_id]['data'].tip_state()(x[node_id]) for node_id in self.nodes()]
+        return np.array( tip_state )
+    
+    def get_number_tipped( self, x):
+        return np.count_nonzero( self.get_tip_states( x ) )
+        
+    def f( self, x, t):
         f = np.zeros( self.number_of_nodes() )
         for idx in range( 0, self.number_of_nodes() ):
             f[idx] = self.dxdt["diag"][idx].__call__( t, x[idx] )
@@ -31,7 +43,7 @@ class tipping_network(DiGraph):
                 f[idx] += cpl[2].__call__(t, x[cpl[0]], x[idx])
         return f
 
-    def jac(self, t, x):
+    def jac(self, x, t):
         jac = np.zeros((self.number_of_nodes(), self.number_of_nodes()))
 
         for cpl in self.jac_dict["cpl"]:
@@ -43,28 +55,22 @@ class tipping_network(DiGraph):
                 jac[idx, idx] += add[2].__call__( t, x[add[0]], x[add[1]])
         return jac
             
-    def get_adjusted_bif_par_vec( self , bif_par_eff_vec , initial_state ):
+    def get_adjusted_control( self , x ):
         """Adjust bifurcation parameter so that the sum of coupling and
         bifurcation parameter (effective bifurcation parameter) 
         equals bif_par_eff_vec"""
-        bif_par_vec = []
+        effective_control = np.zeros(len(x))
+        control = []
         for to_id in range(0,self.number_of_nodes()):
-            cpl_sum = bif_par_eff_vec[to_id]
+            cpl_sum = effective_control[to_id]
             for from_id in range(0,self.number_of_nodes()):
                 if not self.get_edge_data(from_id,to_id) == None:
                     cpl_val = self.get_edge_data(
                                         from_id,to_id)['data'].dxdt_cpl()
-                    cpl_sum += -cpl_val.__call__( 0 , initial_state[from_id] 
-                                                , initial_state[to_id] )
+                    cpl_sum += -cpl_val.__call__( 0, x[from_id], x[to_id] )
             
-            bif_par_vec.append(cpl_sum)
-        return bif_par_vec
-
-    def get_hopf_dict(self):
-        return self._hopf_dict
-
-    def get_node_types(self):
-        return self._node_types
+            control.append(cpl_sum)
+        return control
 
     def compute_impact_matrix(self):
         n = self.number_of_nodes()
