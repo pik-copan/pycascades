@@ -18,8 +18,8 @@ cusp_element_1 = cusp( a = -1, b = 1, c = 0 )
 
 """Create two linear couplings with strength 0.15 and 0.2"""
 from core.coupling import linear_coupling
-coupling_0 = linear_coupling( strength = 0.15 )
-coupling_1 = linear_coupling( strength = 0.2 )
+coupling_0 = linear_coupling( strength = 0.15, x_0 = 0 )
+coupling_1 = linear_coupling( strength = 0.2, x_0 = 0 )
 
 
 """Create a tipping network and add the created elements"""
@@ -34,7 +34,7 @@ net.add_element( cusp_element_1 )
 net.add_coupling( 0, 1, coupling_0 )
 #net.add_coupling( 1, 0, coupling_1 )
 
-"""You can plot the network with the plot_network function from utils module"""
+"""Plot the network with the plot_network function from utils module"""
 from utils import plotter
 plotter.network(net)
 
@@ -84,8 +84,27 @@ while not net.get_tip_states(ev.get_timeseries()[1][-1,:]).any():
 plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,0] )
 plt.show()
     
-"""Look up the gen.net_factory module for some predefined
-network generation functions and the core.evolve and 
-cascades.cascade_lab modules to see how to simulate the dynamics 
-of the network.
-TODO: Extend the tutorial"""
+"""Create networks with the net_factory module"""
+from gen import net_factory as nfac
+
+"""Same two node network as above"""
+net = nfac.pair( cusp_element_0, cusp_element_1, coupling_0)
+plotter.network(net)
+
+"""Chain, ring and shamrock structure"""
+net = nfac.chain( 5, element_pool = [cusp_element_0]
+                   , coupling_pool = [coupling_0] )
+plotter.network(net)
+net = nfac.ring( 5, element_pool = [cusp_element_0]
+                   , coupling_pool = [coupling_0] )
+plotter.network(net)
+net = nfac.shamrock( 4, 3, element_pool = [cusp_element_0]
+                   , coupling_pool = [coupling_0] )
+plotter.network(net)
+
+"""Use networkx graph generator"""
+from networkx import erdos_renyi_graph
+G = erdos_renyi_graph( 10, 0.25, directed = True, seed = None)
+net = nfac.from_nxgraph( G, element_pool = [cusp_element_0]
+                          , coupling_pool = [coupling_0] )
+plotter.network(net)
