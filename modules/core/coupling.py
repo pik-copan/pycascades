@@ -38,21 +38,21 @@ class linear_coupling(coupling):
     def __init__(self, strength):
         """Constructor"""
         coupling.__init__(self)
-        self.strength = strength
+        self._strength = strength
         
     def dxdt_cpl(self):
         """Returns callable for the coupling term of dxdt."""
-        return lambda t, x_from , x_to : self.strength*x_from
+        return lambda t, x_from , x_to : self._strength*x_from
     
     def jac_cpl(self):
         """Returns callable for the jacobian coupling matrix element."""
-        return lambda t, x_from , x_to : self.strength
+        return lambda t, x_from , x_to : self._strength
     
     def jac_diag(self):
         return lambda t, x_from , x_to : 0
 
     def bif_impact(self):
-        return lambda t, x_from , x_to : self.strength*x_from
+        return lambda t, x_from , x_to : self._strength*x_from
 		
 
 

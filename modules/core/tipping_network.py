@@ -5,54 +5,58 @@ class tipping_network(DiGraph):
 
     def __init__( self, incoming_graph_data=None, **attr):
         DiGraph.__init__( self, incoming_graph_data=None, **attr)
-        self.dxdt = { "diag" : [] , "cpl" : [] }
-        self.jac_dict  = { "diag" : [] , "diag_add" : [] , "cpl" : [] }
-
+        
     def add_element( self, tipping_element ):
         ind = self.number_of_nodes()
         super().add_node( ind, data = tipping_element )
-        self.dxdt['diag'].append( tipping_element.dxdt_diag() )
-        self.jac_dict['diag'].append( tipping_element.jac_diag() )
-        self.dxdt['cpl'].append( [] )
+        self.node[ind]['lambda_f'] = tipping_element.dxdt_diag()
+        self.node[ind]['lambda_jac'] = tipping_element.jac_diag()
         
     def add_coupling( self, from_id, to_id, coupling):
         super().add_edge( from_id, to_id, data = coupling)
-        self.dxdt['cpl'][to_id].append( ( from_id, to_id, coupling.dxdt_cpl() ) )
-        self.jac_dict['cpl'].append( (from_id, to_id, coupling.jac_cpl()) )
-        self.jac_dict['diag_add'].append ( ( from_id, to_id, coupling.jac_diag() ) )
+        self[from_id][to_id]['lambda_f'] = coupling.dxdt_cpl()
+        self[from_id][to_id]['lambda_jac'] = coupling.jac_cpl()
+        self[from_id][to_id]['lambda_jac_diag'] = coupling.jac_diag()
 
     def set_param( self, node_id, key, val ):
         element = self.node[node_id]['data']
         element.set_par( key, val)
-        self.dxdt['diag'][node_id] = element.dxdt_diag()
-        self.jac_dict['diag'][node_id] = element.jac_diag()
-        """Update couplings to be faster"""
-        
+        self.node[node_id]['lambda_f'] = self.node[node_id]['data'].dxdt_diag()
+        self.node[node_id]['lambda_jac'] = self.node[node_id]['data'].jac_diag()
+
     def get_tip_states( self, x):
-        tip_state = [self.node[node_id]['data'].tip_state()(x[node_id]) for node_id in self.nodes()]
-        return np.array( tip_state )
+        tipped = [self.node[i]['data'].tip_state()(x[i]) for i in self.nodes()]
+        return np.array( tipped )
     
     def get_number_tipped( self, x):
         return np.count_nonzero( self.get_tip_states( x ) )
         
     def f( self, x, t):
         f = np.zeros( self.number_of_nodes() )
-        for idx in range( 0, self.number_of_nodes() ):
-            f[idx] = self.dxdt["diag"][idx].__call__( t, x[idx] )
-            for cpl in self.dxdt["cpl"][idx]:
-                f[idx] += cpl[2].__call__(t, x[cpl[0]], x[idx])
+        for node in self.nodes(data=True):
+            ind = node[0]
+            x_comp = x[ind]
+            f[ind] = node[1]['lambda_f'].__call__( t, x_comp)
+        for edge in self.edges(data=True):
+            from_id = edge[0]
+            to_id = edge[1]
+            lmd = edge[2]['lambda_f']
+            f[to_id] += lmd.__call__( t, x[from_id], x[to_id])
         return f
 
     def jac(self, x, t):
         jac = np.zeros((self.number_of_nodes(), self.number_of_nodes()))
-
-        for cpl in self.jac_dict["cpl"]:
-            jac[cpl[1], cpl[0]] += cpl[2].__call__( t, x[cpl[0]], x[cpl[1]])
-
-        for idx in range(0, len(x)):
-            jac[idx, idx] = self.jac_dict["diag"][idx].__call__(t, x[idx])
-            for add in self.jac_dict["diag_add"]:
-                jac[idx, idx] += add[2].__call__( t, x[add[0]], x[add[1]])
+        for node in self.nodes(data=True):
+            ind = node[0]
+            x_comp = x[ind]
+            jac[ind,ind] = node[1]['lambda_jac'].__call__( t, x_comp)
+        for edge in self.edges(data=True):
+            from_id = edge[0]
+            to_id = edge[1]
+            lmd = edge[2]['lambda_jac']
+            jac[to_id, from_id] = lmd.__call__( t, x[from_id], x[to_id] )
+            lmd_diag = edge[2]['lambda_jac_diag']
+            jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
             
     def get_adjusted_control( self , x ):
@@ -61,13 +65,12 @@ class tipping_network(DiGraph):
         equals bif_par_eff_vec"""
         effective_control = np.zeros(len(x))
         control = []
-        for to_id in range(0,self.number_of_nodes()):
+        for to_id in range( self.number_of_nodes() ):
             cpl_sum = effective_control[to_id]
-            for from_id in range(0,self.number_of_nodes()):
+            for from_id in range( self.number_of_nodes() ):
                 if not self.get_edge_data(from_id,to_id) == None:
-                    cpl_val = self.get_edge_data(
-                                        from_id,to_id)['data'].dxdt_cpl()
-                    cpl_sum += -cpl_val.__call__( 0, x[from_id], x[to_id] )
+                    cpl_lmd = self[from_id][to_id]['data'].dxdt_cpl()
+                    cpl_sum += -cpl_lmd.__call__( 0, x[from_id], x[to_id] )
             
             control.append(cpl_sum)
         return control
