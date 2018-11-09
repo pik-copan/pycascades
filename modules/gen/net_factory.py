@@ -1,7 +1,7 @@
-"""net_factory module that provides functions to generate 
-   user defined networks from parameters
-   Warning: Functions could be outdated and might have to be
-   updated to make them work!!!"""
+"""net_factory module that provides functions to generate networks.
+Some generators have to be supplied with element and coupling pools,
+which are supposed to be lists of element and coupling objects from which
+a random one is chosen for each node and edge respectively."""
 
 from core.tipping_network import tipping_network
 
