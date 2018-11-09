@@ -58,22 +58,6 @@ class tipping_network(DiGraph):
             lmd_diag = edge[2]['lambda_jac_diag']
             jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
-            
-    def get_adjusted_control( self , x ):
-        """Adjust bifurcation parameter so that the sum of coupling and
-        bifurcation parameter (effective bifurcation parameter) 
-        equals bif_par_eff_vec"""
-        effective_control = np.zeros(len(x))
-        control = []
-        for to_id in range( self.number_of_nodes() ):
-            cpl_sum = effective_control[to_id]
-            for from_id in range( self.number_of_nodes() ):
-                if not self.get_edge_data(from_id,to_id) == None:
-                    cpl_lmd = self[from_id][to_id]['data'].dxdt_cpl()
-                    cpl_sum += -cpl_lmd.__call__( 0, x[from_id], x[to_id] )
-            
-            control.append(cpl_sum)
-        return control
 
     def compute_impact_matrix(self):
         n = self.number_of_nodes()

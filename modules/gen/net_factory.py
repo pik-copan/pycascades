@@ -128,10 +128,10 @@ def create_erdos_renyi( num, link_probability, a, b, cpl_strength_list
     for id in netx.edges():
         cpl_strength = cpl_strength_list[randint(0,len(cpl_strength_list)-1)]
         if uniform(0.0,1.0) > negative_probability:
-            cpl = linear_coupling( cpl_strength)
+            cpl = linear_coupling( cpl_strength, -1)
             net.add_coupling( id[0],id[1], cpl)
         else:
-            cpl = linear_coupling( -cpl_strength)
+            cpl = linear_coupling( -cpl_strength, -1)
             net.add_coupling( id[0],id[1], cpl)
 
     return net
