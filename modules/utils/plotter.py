@@ -3,9 +3,9 @@
 Provides functions/methods to plot stuff.
 """
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
+#from matplotlib.colors import LinearSegmentedColormap
 import networkx as nx
-import numpy as np
+#import numpy as np
 
 def network(net):
     pos=nx.spring_layout(net)
@@ -13,7 +13,8 @@ def network(net):
     nx.draw_networkx_edge_labels( net, pos, edge_labels=nx.get_edge_attributes(
                                                             net, 'weight'))
     plt.show()
-    
+
+"""
 def series(x_array,y_array):
     plt.plot(x_array,y_array)
     plt.show()
@@ -78,3 +79,4 @@ def stability(evolve,xrange,yrange):
     plt.contourf(x, y, stability,levels=[-0.5,0.5,1.5,2.5],cmap=cmp)
 
     plt.colorbar(ticks=[0,1,2])
+"""
