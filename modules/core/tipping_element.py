@@ -52,7 +52,7 @@ class tipping_element:
 
 class cusp(tipping_element):
     """Concrete class for cusp-like tipping element"""
-    def __init__(self, a = -4, b = 1, c = 0, x_0 = 1 ):
+    def __init__(self, a = -4, b = 1, c = 0, x_0 = 0.5 ):
         """Constructor with additional parameters for cusp"""
         super().__init__()
         self._type = 'cusp'

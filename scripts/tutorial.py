@@ -18,7 +18,7 @@ cusp_element_1 = cusp( a = -4, b = 1, c = 0, x_0 = 0.5 )
 
 """Create two linear couplings with strength 0.15 and 0.2"""
 from core.coupling import linear_coupling
-coupling_0 = linear_coupling( strength = 0.15 )
+coupling_0 = linear_coupling( strength = 0.05 )
 coupling_1 = linear_coupling( strength = 0.2 )
 
 
@@ -31,29 +31,32 @@ net = tipping_network()
 can be used, too."""
 net.add_element( cusp_element_0 )
 net.add_element( cusp_element_1 )
-#net.add_coupling( 0, 1, coupling_0 )
-#net.add_coupling( 1, 0, coupling_1 )
+net.add_coupling( 0, 1, coupling_1 )
+net.add_coupling( 1, 0, coupling_0 )
 
 """Plot the network with the plot_network function from utils module"""
 from utils import plotter
-plotter.network(net)
+plotter.network(net).show()
+
+"""Plot phaseflow and phase space of a two-element system"""
+plotter.phase_flow(net, xrange = [-0.2,1.2], yrange = [-0.2,1.2]).show()
+plotter.phase_space(net, xrange = [-0.2,1.2], yrange = [-0.2,1.2]).show()
+plotter.stability(net, xrange = [-0.2,1.2], yrange = [-0.2,1.2]).show()
 
 """Create an evolve module to simulate the tipping network 
 as dynamical system"""
 from core.evolve import evolve
-initial_state = [0.75,0.25]
+initial_state = [0.1,0.9]
 ev = evolve( net, initial_state )
 
 """Manually integrate the system"""
-import matplotlib.pyplot as plt
 timestep = 0.01
 t_end = 10
 ev.integrate( timestep , t_end )
 
 """plot the temporal evolution"""
-plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,0] )
-plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,1] )
-plt.show()
+from utils import plotter
+plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:] ).show()
 
 """Use the equilibrate method to end integration when an 
 equilibrium is reached"""
@@ -63,48 +66,48 @@ tol = 0.005
 breaktime = 100
 
 ev.equilibrate( tol, timestep, breaktime )
-plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,0] )
-plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,1] )
-plt.show()
+plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:] ).show()
 
 """Create a network with one cusp element and increase the control
 until the tipping point is reached"""
-initial_state = [0]
+initial_state = [0,0]
 
 net = tipping_network()
 net.add_element( cusp_element_0 )
+net.add_element( cusp_element_1 )
+net.add_coupling(0,1,coupling_1)
 ev = evolve( net, initial_state )
 
-dc = 0.01
+dc = 0.005
 while not net.get_tip_states(ev.get_timeseries()[1][-1,:]).any():
     ev.equilibrate( tol, timestep, breaktime )
     c = net.node[0]['data'].get_par()['c']
     net.set_param( 0, 'c', c+dc )
 
-plt.plot ( ev.get_timeseries()[0], ev.get_timeseries()[1][:,0] )
-plt.show()
+p=plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:]
+                , legend=True).show()
     
 """Create networks with the net_factory module"""
 from gen import net_factory as nfac
 
 """Same two node network as above"""
 net = nfac.pair( cusp_element_0, cusp_element_1, coupling_0)
-plotter.network(net)
+plotter.network(net).show()
 
 """Chain, ring and shamrock structure"""
 net = nfac.chain( 5, element_pool = [cusp_element_0]
                    , coupling_pool = [coupling_0] )
-plotter.network(net)
+plotter.network(net).show()
 net = nfac.ring( 5, element_pool = [cusp_element_0]
                    , coupling_pool = [coupling_0] )
-plotter.network(net)
+plotter.network(net).show()
 net = nfac.shamrock( 4, 3, element_pool = [cusp_element_0]
                    , coupling_pool = [coupling_0] )
-plotter.network(net)
+plotter.network(net).show()
 
 """Use networkx graph generator"""
 from networkx import erdos_renyi_graph
 G = erdos_renyi_graph( 10, 0.25, directed = True, seed = None)
 net = nfac.from_nxgraph( G, element_pool = [cusp_element_0]
                           , coupling_pool = [coupling_0])
-plotter.network(net)
+plotter.network(net).show()

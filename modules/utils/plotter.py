@@ -1,29 +1,52 @@
-"""cplot module
+"""plotter module
 
-Provides functions/methods to plot stuff.
+Provide functions to generate some useful plots.
 """
 import matplotlib.pyplot as plt
-#from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap
 import networkx as nx
-#import numpy as np
+import numpy as np
 
 def network(net):
     pos=nx.spring_layout(net)
     nx.draw_networkx(net,pos)
     nx.draw_networkx_edge_labels( net, pos, edge_labels=nx.get_edge_attributes(
                                                             net, 'weight'))
-    plt.show()
+    return plt
 
-"""
-def series(x_array,y_array):
-    plt.plot(x_array,y_array)
-    plt.show()
+def network_tip_states(net, x):
+    '''The state given of the tipping_network is plotted.
+    Tipped tipping elements are red, non-tipped elements are green.'''
+    tip_state = net.get_tip_states(x)
+    color_map = []
+    label_dict = {}
+    for node in range(net.number_of_nodes()):
+        label_dict.update({node: str(node) + ' (' +
+                           net.get_node_types()[node] + ')'})
+        if tip_state[node]:
+            color_map.append('red')
+        else:
+            color_map.append('green')
     
-def phase_flow(evolve,xrange,yrange):
-    #plt.style.use('white_background')
+    nx.draw_networkx(net, node_color=color_map, labels=label_dict,
+                     arrows=True, fond_size=10)
+    return plt
+
+def series(t, x, legend=False):
+    for i in range(x.shape[1]):
+        plt.plot(t, x[:,i], label='$x_'+str(i+1)+'$')
+    if legend:
+        plt.legend(bbox_to_anchor=(0.2, 0.9), loc=1, borderaxespad=0.)
+    plt.xlabel('time')
+    plt.ylabel('$x$')
+    return plt
+
+def phase_flow(net, xrange, yrange):
+    if not net.number_of_nodes() == 2:
+        raise ValueError("Function only supported for two-element networks!")
     x,y = np.meshgrid(np.linspace(xrange[0],xrange[1],21), 
                       np.linspace(yrange[0],yrange[1],21))
-    c = [0,0]
+    
     u, v = np.zeros(x.shape), np.zeros(y.shape)
     n_x , n_y = x.shape
     
@@ -31,18 +54,18 @@ def phase_flow(evolve,xrange,yrange):
         for idy in range(n_y):
             x_val = x[idx,idy]
             y_val = y[idx,idy]
-            f = evolve.f(0,[x_val,y_val],c)
+            f = net.f([x_val,y_val], 0)
             u[idx,idy] = f[0]
             v[idx,idy] = f[1]
             
     plt.streamplot(x, y, u, v, color='black')
-    plt.show()
-    
-def phase_space(evolve,xrange,yrange, bif_par_arr):
-    #plt.style.use('white_background')
+    return plt
+
+def phase_space(net, xrange, yrange):
+    if not net.number_of_nodes() == 2:
+        raise ValueError("Function only supported for two-element networks!")
     x,y = np.meshgrid(np.linspace(xrange[0],xrange[1],101), 
                       np.linspace(yrange[0],yrange[1],101))
-    c = bif_par_arr
     r = np.zeros(x.shape)
     n_x , n_y = x.shape
     
@@ -50,17 +73,18 @@ def phase_space(evolve,xrange,yrange, bif_par_arr):
         for idy in range(n_y):
             x_val = x[idx,idy]
             y_val = y[idx,idy]
-            f = evolve.f(0,[x_val,y_val],c)
+            f = net.f([x_val,y_val], 0)
             r[idx,idy] = np.sqrt(pow(f[0],2)+pow(f[1],2))
             
     plt.contourf(x, y, r, 25)
-    plt.show()
-    
-def stability(evolve,xrange,yrange):
+    return plt
 
+def stability(net,xrange,yrange):
+    if not net.number_of_nodes() == 2:
+        raise ValueError("Function only supported for two-element networks!")
     x,y = np.meshgrid(np.linspace(xrange[0],xrange[1],201), 
                       np.linspace(yrange[0],yrange[1],201))
-    c = [0,0]
+
     stability = np.zeros(x.shape)
     n_x , n_y = x.shape
     
@@ -68,15 +92,14 @@ def stability(evolve,xrange,yrange):
         for idy in range(n_y):
             x_val = x[idx,idy]
             y_val = y[idx,idy]
-            val, vec = np.linalg.eig(evolve.jac(0,[x_val,y_val],c))
+            val, vec = np.linalg.eig(net.jac([x_val,y_val],0))
             stable = np.less(val,[0,0])
             
             stability[idx,idy] = sum(stable)
     
-    print(stability)
     colors = [(0.8, 0.1, 0.1), (0.9, 0.9, 0), (0.1, 0.1, 0.8)]
     cmp = LinearSegmentedColormap.from_list('mylist', colors, N=3)        
     plt.contourf(x, y, stability,levels=[-0.5,0.5,1.5,2.5],cmap=cmp)
 
     plt.colorbar(ticks=[0,1,2])
-"""
+    return plt

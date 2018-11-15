@@ -53,7 +53,7 @@ class evolve():
             if t_break and (time.process_time() - t0) >= t_break:
                 raise NoEquilibrium(
                         "No equilibrium found " \
-                        "in "+str(t_break)+" seconds."\
+                        "in " + str(t_break) + " seconds." \
                         " Increase tolerance or breaktime."
                         )
    

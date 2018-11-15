@@ -27,10 +27,14 @@ class tipping_network(DiGraph):
     def get_tip_states( self, x):
         tipped = [self.node[i]['data'].tip_state()(x[i]) for i in self.nodes()]
         return np.array( tipped )
-    
+
+    def get_node_types( self ):
+        type_list = [self.node[i]['data'].get_type() for i in self.nodes()]
+        return type_list
+        
     def get_number_tipped( self, x):
         return np.count_nonzero( self.get_tip_states( x ) )
-        
+
     def f( self, x, t):
         f = np.zeros( self.number_of_nodes() )
         for node in self.nodes(data=True):
@@ -58,7 +62,7 @@ class tipping_network(DiGraph):
             lmd_diag = edge[2]['lambda_jac_diag']
             jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
-
+        
     def compute_impact_matrix(self):
         n = self.number_of_nodes()
         impact_matrix = [[lambda t, x1, x2: 0 for j in range(n)] for i in range(n)]

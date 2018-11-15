@@ -3,6 +3,8 @@
 """
 Created on Thu Nov 15 13:21:50 2018
 
+Example Script: Generation of cusp-like tipping element from 5 parameters
+
 @author: jonathan
 """
 from core.tipping_element import realistic_cusp
@@ -12,7 +14,7 @@ from core.evolve import evolve
 import matplotlib.pyplot as plt
 # Parameter for GIS
 t_scale = 300          # timescale in years
-x = (0,7)              # Sea levels for untipped and tipped states
+x = (0,7)              # Sea levels/m for untipped and tipped states (for c=0)
 c = (0.8,3.2)          # bistable range
 
 cusp1 = realistic_cusp( t_scale, x, c, rho_init = 2)
@@ -39,3 +41,8 @@ while not net.get_tip_states(ev.get_timeseries()[1][-1,:]).any():
 print(eq_time)
 plt.plot(ev.get_timeseries()[0][:], ev.get_timeseries()[1][:,0])
 plt.show()
+
+
+"""TODO: Add THC and the correct couplings between them! 
+Think about efficient simulation of multiple time scale (stiff) systems 
+(bdf-method) and meaningfulness of simulation time"""
