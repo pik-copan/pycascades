@@ -14,12 +14,15 @@ class evolve():
         self._times = []
         self._states = []
         
-        self.save_state( 0, initial_state ) 
+        self._t = 0
+        self._x = initial_state
         
-    def save_state( self , t, y):
+        self.save_state( self._t, self._x ) 
+        
+    def save_state( self , t, x):
         """Save current state if save flag is set"""
         self._times.append( t )
-        self._states.append( y )
+        self._states.append( x )
     
     def get_timeseries( self ):
         times = np.array ( self._times )
@@ -28,10 +31,12 @@ class evolve():
         
     def _integrate( self, t_step ):
         
-        t_span = [ self._times [-1] , self._times [-1] + t_step ]
-        y_init = self._states[-1]
-        sol = odeint( self._net.f , y_init, t_span, Dfun=self._net.jac )
-        self.save_state( t_span[1], sol[1] )
+        t_span = [ self._t , self._t + t_step ]
+        x_init = self._x
+        sol = odeint( self._net.f , x_init, t_span, Dfun=self._net.jac )
+        self._t = t_span[1]
+        self._x = sol[1]
+        self.save_state(self._t, self._x)
         
     def integrate( self, t_step, t_end ):
         """Manually integrate to t_end"""
@@ -45,11 +50,10 @@ class evolve():
         t0 = time.process_time()
         while not self.is_equilibrium( tol ): 
             self._integrate( t_step )
-        
             if t_break and (time.process_time() - t0) >= t_break:
                 raise NoEquilibrium(
                         "No equilibrium found " \
-                        "in "+str(t_break)+" realtime seconds."\
+                        "in "+str(t_break)+" seconds."\
                         " Increase tolerance or breaktime."
                         )
    
@@ -58,7 +62,7 @@ class evolve():
         absolute value of all elements of f_prime is less than tolerance. 
         If True the state can be considered as close to a fixed point"""
         n = self._net.number_of_nodes()
-        f = self._net.f( self._states[-1], self._times[-1])
+        f = self._net.f( self._x, self._t)
         fix = np.less( np.abs( f) , tol * np.ones( n ))
         
         if fix.all():
@@ -70,7 +74,7 @@ class evolve():
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
         n = self._net.number_of_nodes()
-        jacobian = self._net.jac( self._states[-1], self._times[-1])
+        jacobian = self._net.jac( self._x, self._t)
         val, vec = np.linalg.eig( jacobian )
         stable = np.less( val, np.zeros( n ) )
 

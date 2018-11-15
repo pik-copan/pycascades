@@ -35,15 +35,14 @@ class linear_coupling(coupling):
     The coupling consists of a factor (strength) and a coupling element.
     """
 
-    def __init__(self, strength, x_0):
+    def __init__(self, strength):
         """Constructor"""
         coupling.__init__(self)
         self._strength = strength
-        self._x_0 = x_0
         
     def dxdt_cpl(self):
         """Returns callable for the coupling term of dxdt."""
-        return lambda t, x_from , x_to : self._strength*(x_from-self._x_0)
+        return lambda t, x_from , x_to : self._strength * x_from
     
     def jac_cpl(self):
         """Returns callable for the jacobian coupling matrix element."""
@@ -53,7 +52,7 @@ class linear_coupling(coupling):
         return lambda t, x_from , x_to : 0
 
     def bif_impact(self):
-        return lambda t, x_from , x_to : self._strength*(x_from-self._x_0)
+        return lambda t, x_from , x_to : self._strength * x_from
 		
 
 
