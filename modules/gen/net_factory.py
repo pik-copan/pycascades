@@ -51,28 +51,44 @@ def watts_strogatz_graph( G, element_pool, coupling_pool):
 
     return net
 
-def chain( number, element_pool, coupling_pool):
+def k_chain( number, k, element_pool, coupling_pool, unidirectional = False):
     
+    if k >= number:
+        raise ValueError("k must be smaller than the network size!")
+        
     net = tipping_network()
     
     for ind in range(0, number):
         net.add_element(choice(element_pool))
 
-    for ind in range(1, number):
-        net.add_coupling( ind-1, ind, choice(coupling_pool))
+    for ind1 in range(1,k+1):
+        for ind2 in range(ind1, number):
+            net.add_coupling( ind2-ind1, ind2, choice(coupling_pool))
+            if not unidirectional:
+                net.add_coupling( ind2, ind2-ind1, choice(coupling_pool))
 
     return net
 
-def ring( number, element_pool, coupling_pool):
+def k_ring( number, k, element_pool, coupling_pool, unidirectional = False):
     
     net = tipping_network()
     
-    net = chain( number, element_pool, coupling_pool)
+    net = k_chain( number, k, element_pool, coupling_pool, unidirectional)
     
-    net.add_coupling( number-1, 0, choice(coupling_pool))
+    for ind1 in range(1,k+1):
+        for ind2 in range(0,ind1):
+            net.add_coupling( number-ind1+ind2, ind2, choice(coupling_pool))
+            if not unidirectional:
+                net.add_coupling( ind2, number-ind1+ind2, 
+                                  choice(coupling_pool) )
 
     return net
 
+def fully_connected( number, element_pool, coupling_pool):
+    net = tipping_network()
+    net = k_ring( number, number-1, element_pool, coupling_pool)
+    return net
+ 
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):
     
     net = tipping_network()
