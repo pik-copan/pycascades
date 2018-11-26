@@ -89,7 +89,6 @@ p=plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:]
     
 """Create networks with the net_factory module"""
 from gen import net_factory as nfac
-
 """Same two node network as above"""
 net = nfac.pair( cusp_element_0, cusp_element_1, coupling_0)
 plotter.network(net).show()

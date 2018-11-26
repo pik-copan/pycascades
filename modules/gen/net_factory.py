@@ -5,7 +5,7 @@ a random one is chosen for each node and edge respectively."""
 
 from core.tipping_network import tipping_network
 
-from random import choice,uniform,randint
+from random import choice,uniform,randint,seed
 import networkx as nx
 
 
@@ -78,18 +78,30 @@ def fully_connected( number, element_pool, coupling_pool):
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
 
-def watts_strogatz_graph( number, k, p, element_pool, coupling_pool):
+def watts_strogatz_graph( number, k, p, element_pool, coupling_pool, sd=None):
     G = nx_ring( number, k)
 
+    seed(sd)
     rewire = []
-    for edge in G.edges():
-        if uniform(0,1) < p:
-            rewire.append(edge)
+    for k in range(1,k+1):
+        for n in range(number):
+            to_id = n+k
+            while to_id > number-1:
+                to_id -= number
+            if uniform(0,1) < p:
+                rewire.append((n,to_id))
+            to_id = n-k
+            while to_id < 0:
+                to_id += number
+            if uniform(0,1) < p:
+                rewire.append((n,to_id))
             
     for edge in rewire:
-        G.remove_edge( edge[0], edge[1])
-        new_edge = (randint(0, number-1), randint(0, number-1))
-        G.add_edge(new_edge[0], new_edge[1])
+        new_edge = (edge[0], randint(0, number-1))
+        while new_edge[0] == new_edge[1] or G.has_edge(*new_edge):
+            new_edge = (edge[0], randint(0, number-1))
+        G.remove_edge(*edge)
+        G.add_edge(*new_edge)
 
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
