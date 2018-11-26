@@ -9,7 +9,7 @@ Created on Wed Nov 21 15:18:38 2018
 import os
 import csv
       
-class csv_writer():
+class writer():
     def __init__( self, outfile):
         
         self.data = {}

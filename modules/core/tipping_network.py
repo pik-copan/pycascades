@@ -1,4 +1,5 @@
 from networkx import DiGraph
+from copy import deepcopy
 import numpy as np
        
 class tipping_network(DiGraph):
@@ -7,12 +8,14 @@ class tipping_network(DiGraph):
         DiGraph.__init__( self, incoming_graph_data=None, **attr)
         
     def add_element( self, tipping_element ):
+        tipping_element = deepcopy(tipping_element)
         ind = self.number_of_nodes()
         super().add_node( ind, data = tipping_element )
         self.node[ind]['lambda_f'] = tipping_element.dxdt_diag()
         self.node[ind]['lambda_jac'] = tipping_element.jac_diag()
         
     def add_coupling( self, from_id, to_id, coupling):
+        coupling = deepcopy(coupling)
         super().add_edge( from_id, to_id, data = coupling)
         self[from_id][to_id]['lambda_f'] = coupling.dxdt_cpl()
         self[from_id][to_id]['lambda_jac'] = coupling.jac_cpl()

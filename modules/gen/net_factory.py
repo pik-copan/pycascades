@@ -36,6 +36,21 @@ def from_nxgraph( G, element_pool, coupling_pool):
 
     return net
     
+def watts_strogatz_graph( G, element_pool, coupling_pool):
+    
+    if nx.is_directed(G):
+        raise ValueError("Only for undirected graphs!")
+        
+    net = tipping_network()
+    
+    for node in G.nodes():
+        net.add_element(choice(element_pool))
+
+    for edge in G.edges():
+        net.add_coupling( edge[0], edge[1], choice(coupling_pool))
+
+    return net
+
 def chain( number, element_pool, coupling_pool):
     
     net = tipping_network()
