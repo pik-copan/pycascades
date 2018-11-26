@@ -95,10 +95,10 @@ net = nfac.pair( cusp_element_0, cusp_element_1, coupling_0)
 plotter.network(net).show()
 
 """Chain, ring and shamrock structure"""
-net = nfac.k_chain( 5, 1, element_pool = [cusp_element_0]
+net = nfac.k_chain( 5, 2, element_pool = [cusp_element_0]
                       , coupling_pool = [coupling_0] )
 plotter.network(net).show()
-net = nfac.k_ring( 5, 1, element_pool = [cusp_element_0]
+net = nfac.k_ring( 5, 2, element_pool = [cusp_element_0]
                    , coupling_pool = [coupling_0] )
 plotter.network(net).show()
 net = nfac.shamrock( 4, 3, element_pool = [cusp_element_0]

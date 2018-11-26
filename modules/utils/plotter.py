@@ -11,8 +11,6 @@ import numpy as np
 def network(net):
     pos=nx.circular_layout(net)
     nx.draw_networkx(net,pos)
-    nx.draw_networkx_edge_labels( net, pos, edge_labels=nx.get_edge_attributes(
-                                                            net, 'weight'))
     return plt
 
 def network_tip_states(net, x):

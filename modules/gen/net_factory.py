@@ -5,7 +5,7 @@ a random one is chosen for each node and edge respectively."""
 
 from core.tipping_network import tipping_network
 
-from random import choice
+from random import choice,uniform,randint
 import networkx as nx
 
 
@@ -35,60 +35,65 @@ def from_nxgraph( G, element_pool, coupling_pool):
         net.add_coupling( edge[0], edge[1], choice(coupling_pool))
 
     return net
-    
-def watts_strogatz_graph( G, element_pool, coupling_pool):
-    
-    if nx.is_directed(G):
-        raise ValueError("Only for undirected graphs!")
-        
-    net = tipping_network()
-    
-    for node in G.nodes():
-        net.add_element(choice(element_pool))
 
-    for edge in G.edges():
-        net.add_coupling( edge[0], edge[1], choice(coupling_pool))
-
-    return net
-
-def k_chain( number, k, element_pool, coupling_pool, unidirectional = False):
-    
+def nx_chain( number, k, unidirectional = False ):
     if k >= number:
         raise ValueError("k must be smaller than the network size!")
-        
-    net = tipping_network()
-    
+
+    G = nx.DiGraph()
     for ind in range(0, number):
-        net.add_element(choice(element_pool))
+        G.add_node(ind)
 
     for ind1 in range(1,k+1):
         for ind2 in range(ind1, number):
-            net.add_coupling( ind2-ind1, ind2, choice(coupling_pool))
+            G.add_edge( ind2-ind1, ind2)
             if not unidirectional:
-                net.add_coupling( ind2, ind2-ind1, choice(coupling_pool))
+                G.add_edge( ind2, ind2-ind1)
 
+    return G
+
+def k_chain( number, k, element_pool, coupling_pool, unidirectional = False):
+    G = nx_chain(number, k, unidirectional)
+    net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def k_ring( number, k, element_pool, coupling_pool, unidirectional = False):
-    
-    net = tipping_network()
-    
-    net = k_chain( number, k, element_pool, coupling_pool, unidirectional)
-    
+def nx_ring( number, k, unidirectional = False ):
+    G = nx_chain( number, k, unidirectional )
+                 
     for ind1 in range(1,k+1):
         for ind2 in range(0,ind1):
-            net.add_coupling( number-ind1+ind2, ind2, choice(coupling_pool))
+            G.add_edge( number-ind1+ind2, ind2)
             if not unidirectional:
-                net.add_coupling( ind2, number-ind1+ind2, 
-                                  choice(coupling_pool) )
-
+                G.add_edge( ind2, number-ind1+ind2 )
+                
+    return G
+                
+def k_ring( number, k, element_pool, coupling_pool, unidirectional = False):
+    G = nx_ring(number, k, unidirectional)
+    net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
 def fully_connected( number, element_pool, coupling_pool):
     net = tipping_network()
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
- 
+
+def watts_strogatz_graph( number, k, p, element_pool, coupling_pool):
+    G = nx_ring( number, k)
+
+    rewire = []
+    for edge in G.edges():
+        if uniform(0,1) < p:
+            rewire.append(edge)
+            
+    for edge in rewire:
+        G.remove_edge( edge[0], edge[1])
+        new_edge = (randint(0, number-1), randint(0, number-1))
+        G.add_edge(new_edge[0], new_edge[1])
+
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):
     
     net = tipping_network()
