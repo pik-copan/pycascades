@@ -106,6 +106,27 @@ def watts_strogatz_graph( number, k, p, element_pool, coupling_pool, sd=None):
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
+def barabasi_albert_graph( number, element_pool, coupling_pool, sd=None):
+    G = G=nx.DiGraph()
+    G.add_nodes_from([0,1])
+    G.add_edges_from([(0,1),(1,0)])
+
+    while G.number_of_nodes() < number:
+        ind = G.number_of_nodes()
+        G.add_node( ind )
+        for node in G.nodes:
+            print(G.degree(node))
+            print(4*G.number_of_edges())
+            p = G.degree(node) / (4*G.number_of_edges())
+            print(p)
+            if uniform(0,1) < p:
+                G.add_edge( ind, node)
+            if uniform(0,1) < p:
+                G.add_edge( node, ind)
+                
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+    
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):
     
     net = tipping_network()
