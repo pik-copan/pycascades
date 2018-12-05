@@ -135,24 +135,3 @@ def cascade_size(csv_file, x_var, y_var, par):
                      label=p)
     
     return plt
-
-"""   
-        x_end[basin_number].append(ev.states[-1][0])
-        y_end[basin_number].append(ev.states[-1][1])         
-        x_init[basin_number].append(x)
-        y_init[basin_number].append(y)
-        equilibria[basin_number] = [np.mean(x_end[basin_number]), np.mean(y_end[basin_number])]
-
-    plt.xlim(xrange[0], xrange[1])
-    plt.ylim(yrange[0], yrange[1])
-    for basin in enumerate(equilibria):
-        plt.scatter(x_init[basin[0]] , y_init[basin[0]])
-        
-    x_val = [x[0] for x in equilibria]
-    y_val = [x[1] for x in equilibria]
-    plt.scatter(x_val,y_val,c='black')
-    plt.xlabel('$x_1$', fontsize=15)
-    plt.ylabel('$x_2$', fontsize=15)
-    plt.title('$d=2$', fontsize=15)
-    plt.show()
-    """

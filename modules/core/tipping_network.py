@@ -1,11 +1,11 @@
-from networkx import DiGraph
-from copy import deepcopy
+import networkx as nx
 import numpy as np
+from copy import deepcopy
        
-class tipping_network(DiGraph):
+class tipping_network(nx.DiGraph):
 
     def __init__( self, incoming_graph_data=None, **attr):
-        DiGraph.__init__( self, incoming_graph_data=None, **attr)
+        nx.DiGraph.__init__( self, incoming_graph_data=None, **attr)
         
     def add_element( self, tipping_element ):
         tipping_element = deepcopy(tipping_element)
@@ -65,7 +65,14 @@ class tipping_network(DiGraph):
             lmd_diag = edge[2]['lambda_jac_diag']
             jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
-        
+    
+    def get_out_component_size(self, from_id):
+        out_component_size = -1
+        for node in self.nodes():
+            if nx.has_path(self, from_id, node):
+                out_component_size += 1
+        return out_component_size
+    
     def compute_impact_matrix(self):
         n = self.number_of_nodes()
         impact_matrix = [[lambda t, x1, x2: 0 for j in range(n)] for i in range(n)]

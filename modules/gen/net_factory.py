@@ -115,10 +115,7 @@ def barabasi_albert_graph( number, element_pool, coupling_pool, sd=None):
         ind = G.number_of_nodes()
         G.add_node( ind )
         for node in G.nodes:
-            print(G.degree(node))
-            print(4*G.number_of_edges())
             p = G.degree(node) / (4*G.number_of_edges())
-            print(p)
             if uniform(0,1) < p:
                 G.add_edge( ind, node)
             if uniform(0,1) < p:
