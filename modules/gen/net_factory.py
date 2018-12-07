@@ -4,6 +4,7 @@ which are supposed to be lists of element and coupling objects from which
 a random one is chosen for each node and edge respectively."""
 
 from core.tipping_network import tipping_network
+from core.coupling import linear_coupling
 
 from random import choice,uniform,randint,seed
 import networkx as nx
@@ -21,18 +22,28 @@ def pair( element1, element2, coupling_1_to_2, coupling_2_to_1=None):
 
     return net
 
-def from_nxgraph( G, element_pool, coupling_pool):
+def from_nxgraph( G, element_pool, coupling_pool, coupling=None):
     
     if not nx.is_directed(G):
         raise ValueError("Only directed graphs supported!")
+    
+    couplings = []
+    if coupling == 'uniform':
+        for ind in range(G.number_of_edges()):
+            strength = uniform(coupling_pool[0],coupling_pool[1])
+            couplings.append( linear_coupling( strength ) )
+    else:
+        for ind in range(G.number_of_edges()):
+            couplings.append( choice(coupling_pool) )
         
+
     net = tipping_network()
     
     for node in G.nodes():
         net.add_element(choice(element_pool))
 
-    for edge in G.edges():
-        net.add_coupling( edge[0], edge[1], choice(coupling_pool))
+    for ind, edge in enumerate(G.edges()):
+        net.add_coupling( edge[0], edge[1], couplings[ind] )
 
     return net
 
@@ -77,7 +88,7 @@ def fully_connected( number, element_pool, coupling_pool):
     net = tipping_network()
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
-
+    
 def watts_strogatz_graph( number, k, p, element_pool, coupling_pool, sd=None):
     G = nx_ring( number, k)
 
