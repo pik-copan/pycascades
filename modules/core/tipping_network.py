@@ -66,6 +66,18 @@ class tipping_network(nx.DiGraph):
             jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
     
+    def set_vulnerability(self, node_id, bool_val):
+        self.node[node_id]["vulnerable"] = bool_val
+
+    def get_vulnerability_network(self):
+        G = nx.Graph()
+        for node in self.nodes():
+            G.add_node(node)
+            for node2 in self.nodes():
+                if self.node[node]["vulnerable"] and self.node[node2]["vulnerable"]:
+                    G.add_edge(node,node2)
+        return G        
+        
     def get_out_component_size(self, from_id):
         out_component_size = -1
         for node in self.nodes():
