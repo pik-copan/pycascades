@@ -73,10 +73,11 @@ class tipping_network(nx.DiGraph):
         G = nx.Graph()
         for node in self.nodes():
             G.add_node(node)
-            for node2 in self.nodes():
-                if self.node[node]["vulnerable"] and self.node[node2]["vulnerable"]:
-                    G.add_edge(node,node2)
-        return G        
+            G.nodes[node]["vulnerable"] = self.nodes[node]["vulnerable"]
+        for edge in self.edges():
+                if self.node[edge[0]]["vulnerable"] and self.node[edge[1]]["vulnerable"]:
+                    G.add_edge(edge[0],edge[1])
+        return G
         
     def get_out_component_size(self, from_id):
         out_component_size = -1
