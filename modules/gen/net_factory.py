@@ -8,6 +8,7 @@ from core.coupling import linear_coupling
 
 from random import choice,uniform,randint,seed
 import networkx as nx
+from math import floor
 
 
 def pair( element1, element2, coupling_1_to_2, coupling_2_to_1=None):
@@ -89,10 +90,25 @@ def fully_connected( number, element_pool, coupling_pool):
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
     
-def watts_strogatz_graph( number, k, p, element_pool, coupling_pool, sd=None):
-    G = nx_ring( number, k)
+def watts_strogatz_graph( number, degree, p, element_pool, coupling_pool, sd=None):
+    G = nx.DiGraph()
+    for ind in range(0, number):
+        G.add_node(ind)
 
     seed(sd)
+    k = floor(degree/2) + 1
+    for ind1 in range(1,k+1):
+        for ind2 in range(ind1, number):
+            if uniform(ind1,ind1+1) <= degree/2 + 1:
+                G.add_edge( ind2-ind1, ind2)
+            if uniform(ind1,ind1+1) <= degree/2 + 1:
+                G.add_edge( ind2, ind2-ind1 )
+        for ind2 in range(0,ind1):
+            if uniform(ind1,ind1+1) <= degree/2 + 1:
+                G.add_edge( number-ind1+ind2, ind2)
+            if uniform(ind1,ind1+1) <= degree/2 + 1:
+                G.add_edge( ind2, number-ind1+ind2 )
+
     rewire = []
     for k in range(1,k+1):
         for n in range(number):
