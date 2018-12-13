@@ -9,6 +9,7 @@ from core.coupling import linear_coupling
 from random import choice,uniform,randint,seed
 import networkx as nx
 from math import floor
+import numpy as np
 
 
 def pair( element1, element2, coupling_1_to_2, coupling_2_to_1=None):
@@ -23,23 +24,25 @@ def pair( element1, element2, coupling_1_to_2, coupling_2_to_1=None):
 
     return net
 
-def from_nxgraph( G, element_pool, coupling_pool, coupling=None):
-    
+def from_nxgraph( G, element_pool, coupling_pool, coupling=None, sd=None):
+
     if not nx.is_directed(G):
         raise ValueError("Only directed graphs supported!")
-    
+
     couplings = []
     if coupling == 'uniform':
+        seed_list=np.random.randint(0,100*G.number_of_edges(),size=G.number_of_edges())
         for ind in range(G.number_of_edges()):
+            seed(seed_list[ind])
             strength = uniform(coupling_pool[0],coupling_pool[1])
             couplings.append( linear_coupling( strength ) )
     else:
         for ind in range(G.number_of_edges()):
             couplings.append( choice(coupling_pool) )
-        
+
 
     net = tipping_network()
-    
+
     for node in G.nodes():
         net.add_element(choice(element_pool))
 
@@ -90,23 +93,24 @@ def fully_connected( number, element_pool, coupling_pool):
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
     
-def watts_strogatz_graph( number, degree, p, element_pool, coupling_pool, sd=None):
+def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
     G = nx.DiGraph()
     for ind in range(0, number):
         G.add_node(ind)
 
     seed(sd)
     k = floor(degree/2) + 1
+    link_probability = degree / (2*k)
     for ind1 in range(1,k+1):
         for ind2 in range(ind1, number):
-            if uniform(ind1,ind1+1) <= degree/2 + 1:
+            if uniform(0,1) < link_probability:
                 G.add_edge( ind2-ind1, ind2)
-            if uniform(ind1,ind1+1) <= degree/2 + 1:
+            if uniform(0,1) < link_probability:
                 G.add_edge( ind2, ind2-ind1 )
         for ind2 in range(0,ind1):
-            if uniform(ind1,ind1+1) <= degree/2 + 1:
+            if uniform(0,1) < link_probability:
                 G.add_edge( number-ind1+ind2, ind2)
-            if uniform(ind1,ind1+1) <= degree/2 + 1:
+            if uniform(0,1) < link_probability:
                 G.add_edge( ind2, number-ind1+ind2 )
 
     rewire = []
@@ -133,7 +137,7 @@ def watts_strogatz_graph( number, degree, p, element_pool, coupling_pool, sd=Non
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def barabasi_albert_graph( number, element_pool, coupling_pool, sd=None):
+def barabasi_albert_graph( number, average_degree, element_pool, coupling_pool, sd=None):
     G = G=nx.DiGraph()
     G.add_nodes_from([0,1])
     G.add_edges_from([(0,1),(1,0)])
@@ -142,12 +146,29 @@ def barabasi_albert_graph( number, element_pool, coupling_pool, sd=None):
         ind = G.number_of_nodes()
         G.add_node( ind )
         for node in G.nodes:
-            p = G.degree(node) / (4*G.number_of_edges())
+            p = G.degree(node) / G.number_of_edges()
             if uniform(0,1) < p:
                 G.add_edge( ind, node)
             if uniform(0,1) < p:
                 G.add_edge( node, ind)
-                
+    
+    deg = G.number_of_edges() / G.number_of_nodes()
+    while deg < average_degree:
+        node1 = randint(0, number-1)
+        node2 = randint(0, number-1)
+        if node1 == node2:
+            continue
+        p = (G.degree(node1) + G.degree(node2)) / (2*G.number_of_edges())
+        if uniform(0,1) < p:
+            G.add_edge(node1, node2)
+        deg = G.number_of_edges() / G.number_of_nodes()
+        
+    while deg > average_degree:
+        edge = (randint(0, number-1), randint(0, number-1))
+        if G.has_edge(edge[0],edge[1]):
+            G.remove_edge(*edge)
+            deg = G.number_of_edges() / G.number_of_nodes()
+
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
     
