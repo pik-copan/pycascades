@@ -92,7 +92,7 @@ def fully_connected( number, element_pool, coupling_pool):
     net = tipping_network()
     net = k_ring( number, number-1, element_pool, coupling_pool)
     return net
-    
+
 def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
     G = nx.DiGraph()
     for ind in range(0, number):
@@ -113,20 +113,12 @@ def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
             if uniform(0,1) < link_probability:
                 G.add_edge( ind2, number-ind1+ind2 )
 
+    print(G.edges)
     rewire = []
-    for k in range(1,k+1):
-        for n in range(number):
-            to_id = n+k
-            while to_id > number-1:
-                to_id -= number
-            if uniform(0,1) < p:
-                rewire.append((n,to_id))
-            to_id = n-k
-            while to_id < 0:
-                to_id += number
-            if uniform(0,1) < p:
-                rewire.append((n,to_id))
-            
+    for edge in G.edges:
+        if uniform(0,1) < p:
+            rewire.append(edge)
+    print(rewire)
     for edge in rewire:
         new_edge = (edge[0], randint(0, number-1))
         while new_edge[0] == new_edge[1] or G.has_edge(*new_edge):
