@@ -113,16 +113,19 @@ def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
             if uniform(0,1) < link_probability:
                 G.add_edge( ind2, number-ind1+ind2 )
 
-    print(G.edges)
     rewire = []
     for edge in G.edges:
         if uniform(0,1) < p:
             rewire.append(edge)
-    print(rewire)
+
     for edge in rewire:
         new_edge = (edge[0], randint(0, number-1))
+        tries = 0
         while new_edge[0] == new_edge[1] or G.has_edge(*new_edge):
             new_edge = (edge[0], randint(0, number-1))
+            tries += 1
+            if tries == pow(G.number_of_nodes(),2):
+                break
         G.remove_edge(*edge)
         G.add_edge(*new_edge)
 
