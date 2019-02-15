@@ -8,7 +8,7 @@ from core.coupling import linear_coupling
 
 from random import choice,uniform,randint,seed
 import networkx as nx
-from math import floor
+from math import floor,sqrt,exp
 import numpy as np
 
 
@@ -88,9 +88,9 @@ def k_ring( number, k, element_pool, coupling_pool, unidirectional = False):
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def fully_connected( number, element_pool, coupling_pool):
-    net = tipping_network()
-    net = k_ring( number, number-1, element_pool, coupling_pool)
+def complete_graph( number, element_pool, coupling_pool):
+    G = nx.complete_graph(number, nx.DiGraph())
+    net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
 def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
@@ -125,6 +125,7 @@ def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
             new_edge = (edge[0], randint(0, number-1))
             tries += 1
             if tries == pow(G.number_of_nodes(),2):
+                new_edge = edge
                 break
         G.remove_edge(*edge)
         G.add_edge(*new_edge)
@@ -132,7 +133,8 @@ def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def barabasi_albert_graph( number, average_degree, element_pool, coupling_pool, sd=None):
+def barabasi_albert_graph(number, average_degree, element_pool, coupling_pool,
+                          sd=None):
     G = G=nx.DiGraph()
     G.add_nodes_from([0,1])
     G.add_edges_from([(0,1),(1,0)])
@@ -165,6 +167,34 @@ def barabasi_albert_graph( number, average_degree, element_pool, coupling_pool, 
             deg = G.number_of_edges() / G.number_of_nodes()
 
     net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
+"""Spatial Graph generated with the Waxman model on a two-dimensional plane"""
+def spatial_graph(number, beta, characteristic_length, element_pool,
+                  coupling_pool, sd=None):
+    
+    G = nx.complete_graph(number, nx.DiGraph())
+    
+    for node in G.nodes(data=True):
+        node[1]['pos'] = (uniform(0,1), uniform(0,1))
+    
+    remove = []
+    for edge in G.edges():
+        dist = sqrt(pow(G.node[edge[1]]['pos'][0] - 
+                        G.node[edge[0]]['pos'][0], 2) +
+                    pow(G.node[edge[1]]['pos'][1] - 
+                        G.node[edge[0]]['pos'][1], 2))
+    
+        probability = 1 - beta*exp(-dist/characteristic_length)
+        if uniform(0,1) < probability:
+            remove.append(edge)
+
+    for edge in remove:
+        G.remove_edge(*edge)
+
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    for node in net.nodes(data=True):
+        node[1]['pos'] = G.node[node[0]]['pos']
     return net
     
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):

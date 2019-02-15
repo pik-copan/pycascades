@@ -8,9 +8,20 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-def network(net):
-    pos=nx.circular_layout(net)
+def network(net, spatial=False, edge_labels=False):
+    if spatial:
+        pos = {}
+        for node in net.nodes(data=True):
+            pos[node[0]]=node[1]['pos']
+    else:
+        pos=nx.circular_layout(net)
+
     nx.draw_networkx(net,pos)
+    if edge_labels:
+        labels = {}
+        for edge in net.edges(data=True):
+            labels[(edge[0], edge[1])] = edge[2]['data']._strength
+        nx.draw_networkx_edge_labels(net,pos,edge_labels=labels)
     return plt
 
 def network_tip_states(net, x):
