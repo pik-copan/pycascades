@@ -15,7 +15,7 @@ from core.coupling import linear_coupling
 import networkx as nx
 import numpy as np
 
-def generate_network(net_data, average_degree, coupling_factor=0.01):
+def generate_network(net_data, average_degree, coupling=1, cpl_mode='read'):
     net = tipping_network()
     element = cusp( a = -4, b = 1, c = 0, x_0 = 0.5 )
     
@@ -29,20 +29,26 @@ def generate_network(net_data, average_degree, coupling_factor=0.01):
     it = np.nditer(flows_xy, flags=['multi_index'])
     couplings = []
     while not it.finished:
-        couplings.append((it.multi_index[0], 
-                          it.multi_index[1], 
-                          coupling_factor * it[0]))
+        if not it.multi_index[0] == it.multi_index[1]:
+            couplings.append((it.multi_index[0], 
+                              it.multi_index[1], 
+                              coupling * it[0]))
         it.iternext()
 
     desired_edge_number = round(average_degree * net.number_of_nodes())
     start_idx = len(couplings) - desired_edge_number
 
     couplings = sorted(couplings, key=lambda x: x[2])
+    print(couplings)
     couplings = couplings[start_idx:]
     
     for cpl in couplings:
-        coupling = linear_coupling(cpl[2])
-        net.add_coupling( cpl[0], cpl[1], coupling )
+        if cpl_mode is 'homogenous':
+            cpl_val = coupling
+        else:
+            cpl_val = cpl[2]
+        coupling_object = linear_coupling(cpl_val)
+        net.add_coupling( cpl[0], cpl[1], coupling_object )
 
     print("Amazon rain forest network generated!")
     d = net.number_of_edges() / net.number_of_nodes()
