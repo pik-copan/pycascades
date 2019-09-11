@@ -200,10 +200,10 @@ def spatial_graph(number, beta, characteristic_length, element_pool,
     return net
 
 def directed_configuration_model(original_network, element_pool,
-                                 coupling_pool):
+                                 coupling_pool, sd=None):
     din=list(d for n, d in original_network.in_degree())
     dout=list(d for n, d in original_network.out_degree())
-    G=nx.directed_configuration_model(din,dout)
+    G=nx.directed_configuration_model(din,dout, seed=sd)
     G = nx.DiGraph(G)
     G.remove_edges_from(nx.selfloop_edges(G))
 
