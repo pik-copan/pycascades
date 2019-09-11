@@ -24,9 +24,16 @@ def network(net, spatial=False, edge_labels=False):
         nx.draw_networkx_edge_labels(net,pos,edge_labels=labels)
     return plt
 
-def network_tip_states(net, x):
+def network_tip_states(net, x, spatial=False):
     '''The state given of the tipping_network is plotted.
     Tipped tipping elements are red, non-tipped elements are green.'''
+    if spatial:
+        pos = {}
+        for node in net.nodes(data=True):
+            pos[node[0]]=node[1]['pos']
+    else:
+        pos=nx.circular_layout(net)
+
     tip_state = net.get_tip_states(x)
     color_map = []
     label_dict = {}
@@ -38,7 +45,7 @@ def network_tip_states(net, x):
         else:
             color_map.append('green')
     
-    nx.draw_networkx(net, node_color=color_map, labels=label_dict,
+    nx.draw_networkx(net, pos, node_color=color_map, labels=label_dict,
                      arrows=True, fond_size=10)
     return plt
 

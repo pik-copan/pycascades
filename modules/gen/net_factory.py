@@ -31,7 +31,8 @@ def from_nxgraph( G, element_pool, coupling_pool, coupling=None, sd=None):
 
     couplings = []
     if coupling == 'uniform':
-        seed_list=np.random.randint(0,100*G.number_of_edges(),size=G.number_of_edges())
+        seed_list=np.random.randint(0,100*G.number_of_edges(),
+                                    size=G.number_of_edges())
         for ind in range(G.number_of_edges()):
             seed(seed_list[ind])
             strength = uniform(coupling_pool[0],coupling_pool[1])
@@ -144,6 +145,7 @@ def barabasi_albert_graph(number, average_degree, element_pool, coupling_pool,
         G.add_node( ind )
         for node in G.nodes:
             p = G.degree(node) / G.number_of_edges()
+            print(p)
             if uniform(0,1) < p:
                 G.add_edge( ind, node)
             if uniform(0,1) < p:
@@ -195,6 +197,17 @@ def spatial_graph(number, beta, characteristic_length, element_pool,
     net = from_nxgraph(G, element_pool, coupling_pool)
     for node in net.nodes(data=True):
         node[1]['pos'] = G.node[node[0]]['pos']
+    return net
+
+def directed_configuration_model(original_network, element_pool,
+                                 coupling_pool):
+    din=list(d for n, d in original_network.in_degree())
+    dout=list(d for n, d in original_network.out_degree())
+    G=nx.directed_configuration_model(din,dout)
+    G = nx.DiGraph(G)
+    G.remove_edges_from(nx.selfloop_edges(G))
+
+    net = from_nxgraph(G, element_pool, coupling_pool)
     return net
     
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):

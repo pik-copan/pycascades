@@ -26,15 +26,16 @@ def generate_network(net_data, average_degree, coupling=1, cpl_mode='read'):
         net.node[idx]['pos'] = (val, lat_y[idx])
     
     rain = net_data.variables["rain"][:]
+    """
     rain_mean = np.nanmean(rain)
     inds = np.where(np.isnan(rain))
     rain[inds]= rain_mean
+    """
     flows_xy = net_data.variables["network"][:,:]
     it = np.nditer(flows_xy, flags=['multi_index'])
     couplings = []
     while not it.finished:
         if not it.multi_index[0] == it.multi_index[1]:
-            #print(it.multi_index[0],it.multi_index[1],it[0], rain[it.multi_index[0]], rain[it.multi_index[0]])
             couplings.append((it.multi_index[1],
                               it.multi_index[0],
                               coupling * it[0] / rain[it.multi_index[0]],

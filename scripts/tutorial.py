@@ -97,7 +97,7 @@ plotter.network(net).show()
 net = nfac.k_chain( 5, 2, element_pool = [cusp_element_0]
                       , coupling_pool = [coupling_0] )
 plotter.network(net).show()
-net = nfac.k_ring( 5, 2, element_pool = [cusp_element_0]
+net = nfac.k_ring( 5, 3, element_pool = [cusp_element_0]
                    , coupling_pool = [coupling_0] )
 plotter.network(net).show()
 net = nfac.shamrock( 4, 3, element_pool = [cusp_element_0]
@@ -106,7 +106,13 @@ plotter.network(net).show()
 
 """Use networkx graph generator"""
 from networkx import erdos_renyi_graph
-G = erdos_renyi_graph( 10, 0.25, directed = True, seed = None)
+G = erdos_renyi_graph(10, 0.25, directed = True, seed = None)
 net = nfac.from_nxgraph( G, element_pool = [cusp_element_0]
-                          , coupling_pool = [coupling_0])
-plotter.network(net).show()
+                          , coupling_pool = (0,0.2), coupling = 'uniform')
+
+net = nfac.small_world(10, 8, 0.5, element_pool = [cusp_element_0]
+                                  , coupling_pool = [coupling_0] )
+from gen import net_factory as nfac
+net = nfac.spatial_graph(100,0.4,0.1, element_pool=[cusp_element_0], 
+                         coupling_pool=[coupling_0])
+plotter.network(net, spatial=True).show()
