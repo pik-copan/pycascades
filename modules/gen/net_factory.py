@@ -6,7 +6,7 @@ a random one is chosen for each node and edge respectively."""
 from core.tipping_network import tipping_network
 from core.coupling import linear_coupling
 
-from random import choice,uniform,randint,seed
+from random import choice,uniform,randint,seed,shuffle
 import networkx as nx
 from math import floor,sqrt,exp
 import numpy as np
@@ -94,6 +94,44 @@ def complete_graph( number, element_pool, coupling_pool):
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
+def directed_watts_strogatz_graph(number, k, rewiring):
+    G = nx.watts_strogatz_graph(number, k, rewiring)
+    
+    G_new = nx.empty_graph(G.nodes(), create_using=nx.DiGraph())
+    for edge in G.edges():
+        if uniform(0,1) < 0.5:
+            G_new.add_edge(edge[0], edge[1])
+        else:
+            G_new.add_edge(edge[1], edge[0])
+    
+    return G_new
+
+def directed_watts_strogatz_graph_transitivity(number, k, transitivity, sd=None):
+    G = nx.Graph()
+    nodes = list(range(number))
+    for j in range(1, k // 2 + 1):
+        targets = nodes[j:] + nodes[0:j]
+        G.add_edges_from(zip(nodes, targets))
+    
+    if nx.transitivity(G) < transitivity:
+        raise ValueError("Transitivity too large to achieve")
+        
+    G = nx.DiGraph(G)
+    
+    if sd:
+        seed(2*sd)
+
+    while nx.transitivity(G) > transitivity:
+        edge = choice(list(G.edges()))
+        G.remove_edge(*edge)
+        while True:
+            edge = (randint(0, G.number_of_nodes()), 
+                    randint(0, G.number_of_nodes()))
+            if not G.has_edge(edge[0], edge[1]):
+                G.add_edge(edge[0], edge[1])
+                break
+    return G
+"""
 def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
     G = nx.DiGraph()
     for ind in range(0, number):
@@ -133,6 +171,7 @@ def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
 
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
+"""
 
 def barabasi_albert_graph(number, average_degree, element_pool, coupling_pool,
                           sd=None):
@@ -207,6 +246,99 @@ def directed_configuration_model(original_network, element_pool,
     G = nx.DiGraph(G)
     G.remove_edges_from(nx.selfloop_edges(G))
 
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
+def directed_configuration_model_reciprocity(original_network, element_pool,
+                                             coupling_pool, sd=None):
+    r_list=[]
+    in_list=[]
+    out_list=[]
+    for idx, node in enumerate(original_network.nodes()):
+        pred = set(original_network.predecessors(node))
+        succ = set(original_network.successors(node))
+        overlap = pred & succ
+        for rcount in range(len(overlap)):
+            r_list.append(idx)
+        for in_count in range(len(pred) - len(overlap)):
+            in_list.append(idx)
+        for out_count in range(len(succ) - len(overlap)):
+            out_list.append(idx)
+
+    G=nx.empty_graph(original_network.number_of_nodes(),
+                     create_using=nx.DiGraph())
+    shuffle(r_list)
+    shuffle(in_list)
+    shuffle(out_list)
+    while in_list:
+        while True:
+            edge = (randint(0, len(out_list)-1), randint(0, len(in_list)-1))
+            if not G.has_edge(in_list[edge[1]], out_list[edge[0]]):
+                G.add_edge(out_list.pop(edge[0]), in_list.pop(edge[1]))
+                break
+    while r_list:
+        n1 = r_list.pop()
+        if not r_list:
+            break
+        n2 = r_list.pop()
+        G.add_edges_from([(n1, n2), (n2, n1)])
+        
+    G = nx.DiGraph(G)
+    G.remove_edges_from(nx.selfloop_edges(G))
+    
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
+def directed_configuration_model_transitivity(original_network, element_pool,
+                                              coupling_pool, sd=None):
+    reciprocity = nx.reciprocity(original_network)
+    G = nx.Graph(original_network)
+    
+    joint_degree = []
+    for node in G.nodes():
+        neighbors = G.neighbors(node)
+        N = G.subgraph(neighbors)
+        comp_sizes = [len(c) for c in sorted(nx.connected_components(N), 
+                      key=len, reverse=True)]
+        triangles = [x for x in comp_sizes if x > 1]
+        degree = [x for x in comp_sizes if x == 1]
+        joint_degree.append((sum(triangles)-len(triangles), sum(degree)))
+
+    G = nx.random_clustered_graph(joint_degree)
+    
+    G = nx.Graph(G)
+    G.remove_edges_from(nx.selfloop_edges(G))
+    
+    G_new = nx.empty_graph(original_network.nodes(), create_using=nx.DiGraph())
+    for edge in G.edges():
+        if uniform(0,1) < 0.5:
+            G_new.add_edge(edge[0], edge[1])
+            if uniform(0,1) < reciprocity:
+                G_new.add_edge(edge[1], edge[0])
+        else:
+            G_new.add_edge(edge[1], edge[0])
+            if uniform(0,1) < reciprocity:
+                G_new.add_edge(edge[0], edge[1])
+    
+    net = from_nxgraph(G_new, element_pool, coupling_pool)
+    return net
+
+def random_reciprocity_model(number, p, reciprocity, element_pool,
+                             coupling_pool, sd=None):
+    G = nx.erdos_renyi_graph(number, p/2, directed=False, seed=sd)
+    G = nx.DiGraph(G)
+    
+    seed(2*sd)
+    while nx.reciprocity(G) > reciprocity:
+        edge = choice(list(G.edges()))
+        G.remove_edge(*edge)
+        while True:
+            edge = (randint(0, G.number_of_nodes()), 
+                    randint(0, G.number_of_nodes()))
+            if not G.has_edge(edge[0], edge[1]):
+                G.add_edge(edge[0], edge[1])
+                break
+            
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
     
