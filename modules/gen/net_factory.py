@@ -328,17 +328,18 @@ def random_reciprocity_model(number, p, reciprocity, element_pool,
     G = nx.erdos_renyi_graph(number, p/2, directed=False, seed=sd)
     G = nx.DiGraph(G)
     
-    seed(2*sd)
+    if sd:
+        seed(2*sd)
     while nx.reciprocity(G) > reciprocity:
         edge = choice(list(G.edges()))
         G.remove_edge(*edge)
         while True:
-            edge = (randint(0, G.number_of_nodes()), 
-                    randint(0, G.number_of_nodes()))
+            edge = (randint(0, G.number_of_nodes()-1), 
+                    randint(0, G.number_of_nodes()-1))
             if not G.has_edge(edge[0], edge[1]):
                 G.add_edge(edge[0], edge[1])
                 break
-            
+    
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
     
