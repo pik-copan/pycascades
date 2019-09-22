@@ -285,7 +285,8 @@ def random_reciprocity_model(number, p, reciprocity, element_pool,
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def random_clustering_model(number, edge_number, clustering, sd=None):
+def random_clustering_model(number, edge_number, clustering, element_pool,
+                            coupling_pool, sd=None):
     if sd:
         seed(2*sd)
     
@@ -311,11 +312,9 @@ def random_clustering_model(number, edge_number, clustering, sd=None):
                 G.add_edge(edge[0], edge[1])
                 break
     
-    return G
-    """
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
-    """
+
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):
     
     net = tipping_network()
