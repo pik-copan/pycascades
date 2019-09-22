@@ -106,31 +106,7 @@ def directed_watts_strogatz_graph(number, k, rewiring):
     
     return G_new
 
-def directed_watts_strogatz_graph_transitivity(number, k, transitivity, sd=None):
-    G = nx.Graph()
-    nodes = list(range(number))
-    for j in range(1, k // 2 + 1):
-        targets = nodes[j:] + nodes[0:j]
-        G.add_edges_from(zip(nodes, targets))
-    
-    if nx.transitivity(G) < transitivity:
-        raise ValueError("Transitivity too large to achieve")
-        
-    G = nx.DiGraph(G)
-    
-    if sd:
-        seed(2*sd)
 
-    while nx.transitivity(G) > transitivity:
-        edge = choice(list(G.edges()))
-        G.remove_edge(*edge)
-        while True:
-            edge = (randint(0, G.number_of_nodes()), 
-                    randint(0, G.number_of_nodes()))
-            if not G.has_edge(edge[0], edge[1]):
-                G.add_edge(edge[0], edge[1])
-                break
-    return G
 """
 def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
     G = nx.DiGraph()
@@ -289,40 +265,6 @@ def directed_configuration_model_reciprocity(original_network, element_pool,
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def directed_configuration_model_transitivity(original_network, element_pool,
-                                              coupling_pool, sd=None):
-    reciprocity = nx.reciprocity(original_network)
-    G = nx.Graph(original_network)
-    
-    joint_degree = []
-    for node in G.nodes():
-        neighbors = G.neighbors(node)
-        N = G.subgraph(neighbors)
-        comp_sizes = [len(c) for c in sorted(nx.connected_components(N), 
-                      key=len, reverse=True)]
-        triangles = [x for x in comp_sizes if x > 1]
-        degree = [x for x in comp_sizes if x == 1]
-        joint_degree.append((sum(triangles)-len(triangles), sum(degree)))
-
-    G = nx.random_clustered_graph(joint_degree)
-    
-    G = nx.Graph(G)
-    G.remove_edges_from(nx.selfloop_edges(G))
-    
-    G_new = nx.empty_graph(original_network.nodes(), create_using=nx.DiGraph())
-    for edge in G.edges():
-        if uniform(0,1) < 0.5:
-            G_new.add_edge(edge[0], edge[1])
-            if uniform(0,1) < reciprocity:
-                G_new.add_edge(edge[1], edge[0])
-        else:
-            G_new.add_edge(edge[1], edge[0])
-            if uniform(0,1) < reciprocity:
-                G_new.add_edge(edge[0], edge[1])
-    
-    net = from_nxgraph(G_new, element_pool, coupling_pool)
-    return net
-
 def random_reciprocity_model(number, p, reciprocity, element_pool,
                              coupling_pool, sd=None):
     G = nx.erdos_renyi_graph(number, p/2, directed=False, seed=sd)
@@ -336,13 +278,44 @@ def random_reciprocity_model(number, p, reciprocity, element_pool,
         while True:
             edge = (randint(0, G.number_of_nodes()-1), 
                     randint(0, G.number_of_nodes()-1))
-            if not G.has_edge(edge[0], edge[1]):
+            if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
                 G.add_edge(edge[0], edge[1])
                 break
     
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
+
+def random_clustering_model(number, edge_number, clustering, sd=None):
+    if sd:
+        seed(2*sd)
     
+    G = nx.empty_graph(number, create_using=nx.DiGraph())
+    
+    while G.number_of_edges() < edge_number:
+        n1 = randint(0, G.number_of_nodes()-1)
+        n2 = randint(0, G.number_of_nodes()-1)
+        n3 = randint(0, G.number_of_nodes()-1)
+        if not (n1 == n2 or n2 == n3 or n1 == n3):
+            G.add_edges_from([(n1,n2),(n2,n1),(n2,n3),(n3,n2),(n3,n1),(n1,n3)])
+
+    if nx.average_clustering(G) < clustering:
+        raise ValueError("Clustering too large too achieve!")
+
+    while nx.average_clustering(G) > clustering:
+        edge = choice(list(G.edges()))
+        G.remove_edge(*edge)
+        while True:
+            edge = (randint(0, G.number_of_nodes()-1), 
+                    randint(0, G.number_of_nodes()-1))
+            if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
+                G.add_edge(edge[0], edge[1])
+                break
+    
+    return G
+    """
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+    """
 def shamrock( leave_number, leave_size, element_pool, coupling_pool):
     
     net = tipping_network()
