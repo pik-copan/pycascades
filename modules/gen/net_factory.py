@@ -133,7 +133,7 @@ def directed_watts_strogatz_graph(n, degree, beta, element_pool, coupling_pool,
     return net
 
 def scale_free_graph(n, degree, element_pool, coupling_pool, sd=None):
-    beta = 1-1/degree
+    beta = 1-1/degree+1e-9
     alpha = (1-beta)/2
     gamma = (1-beta)/2
     
