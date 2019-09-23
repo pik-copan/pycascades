@@ -7,8 +7,9 @@ from core.tipping_network import tipping_network
 from core.coupling import linear_coupling
 
 from random import choice,uniform,randint,seed,shuffle
+from copy import deepcopy
 import networkx as nx
-from math import floor,sqrt,exp
+from math import sqrt,exp,ceil
 import numpy as np
 
 
@@ -94,60 +95,42 @@ def complete_graph( number, element_pool, coupling_pool):
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def directed_watts_strogatz_graph(number, k, rewiring):
-    G = nx.watts_strogatz_graph(number, k, rewiring)
+def directed_watts_strogatz_graph(n, degree, beta, element_pool, coupling_pool,
+                                  sd=None):
+    k = ceil(degree/2)*2
+    if k > n:
+        raise nx.NetworkXError("k>n, choose smaller k or larger n")
     
-    G_new = nx.empty_graph(G.nodes(), create_using=nx.DiGraph())
-    for edge in G.edges():
-        if uniform(0,1) < 0.5:
-            G_new.add_edge(edge[0], edge[1])
-        else:
-            G_new.add_edge(edge[1], edge[0])
+    #If k == n, the graph is complete not Watts-Strogatz
+    if k == n:
+        return nx.complete_graph(n)
+
+    G = nx.Graph()
+    nodes = list(range(n))  # nodes are labeled 0 to n-1
+    # connect each node to k/2 neighbors
+    for j in range(1, k // 2 + 1):
+        targets = nodes[j:] + nodes[0:j]  # first j nodes are now last in list
+        G.add_edges_from(zip(nodes, targets))
     
-    return G_new
+    G = nx.DiGraph(G)
+    
+    while (G.number_of_edges()/G.number_of_nodes()) > degree:
+        G.remove_edge(*choice(list(G.edges())))
 
-
-"""
-def small_world( number, degree, p, element_pool, coupling_pool, sd=None):
-    G = nx.DiGraph()
-    for ind in range(0, number):
-        G.add_node(ind)
-
-    seed(sd)
-    k = floor(degree/2) + 1
-    link_probability = degree / (2*k)
-    for ind1 in range(1,k+1):
-        for ind2 in range(ind1, number):
-            if uniform(0,1) < link_probability:
-                G.add_edge( ind2-ind1, ind2)
-            if uniform(0,1) < link_probability:
-                G.add_edge( ind2, ind2-ind1 )
-        for ind2 in range(0,ind1):
-            if uniform(0,1) < link_probability:
-                G.add_edge( number-ind1+ind2, ind2)
-            if uniform(0,1) < link_probability:
-                G.add_edge( ind2, number-ind1+ind2 )
-
-    rewire = []
-    for edge in G.edges:
-        if uniform(0,1) < p:
-            rewire.append(edge)
-
-    for edge in rewire:
-        new_edge = (edge[0], randint(0, number-1))
-        tries = 0
-        while new_edge[0] == new_edge[1] or G.has_edge(*new_edge):
-            new_edge = (edge[0], randint(0, number-1))
-            tries += 1
-            if tries == pow(G.number_of_nodes(),2):
-                new_edge = edge
-                break
-        G.remove_edge(*edge)
-        G.add_edge(*new_edge)
-
+    edges = deepcopy(G.edges())
+    
+    for edge in edges:
+        if uniform(0,1) < beta:
+            G.remove_edge(edge[0],edge[1])
+            while True:
+                edge = (randint(0, G.number_of_nodes()-1), 
+                        randint(0, G.number_of_nodes()-1))
+                if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
+                    G.add_edge(edge[0], edge[1])
+                    break   
+    
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
-"""
 
 def barabasi_albert_graph(number, average_degree, element_pool, coupling_pool,
                           sd=None):
