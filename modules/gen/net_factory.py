@@ -132,39 +132,12 @@ def directed_watts_strogatz_graph(n, degree, beta, element_pool, coupling_pool,
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def barabasi_albert_graph(number, average_degree, element_pool, coupling_pool,
-                          sd=None):
-    G = G=nx.DiGraph()
-    G.add_nodes_from([0,1])
-    G.add_edges_from([(0,1),(1,0)])
-
-    while G.number_of_nodes() < number:
-        ind = G.number_of_nodes()
-        G.add_node( ind )
-        for node in G.nodes:
-            p = G.degree(node) / G.number_of_edges()
-            print(p)
-            if uniform(0,1) < p:
-                G.add_edge( ind, node)
-            if uniform(0,1) < p:
-                G.add_edge( node, ind)
+def scale_free_graph(n, degree, element_pool, coupling_pool, sd=None):
+    beta = 1-1/degree
+    alpha = (1-beta)/2
+    gamma = (1-beta)/2
     
-    deg = G.number_of_edges() / G.number_of_nodes()
-    while deg < average_degree:
-        node1 = randint(0, number-1)
-        node2 = randint(0, number-1)
-        if node1 == node2:
-            continue
-        p = (G.degree(node1) + G.degree(node2)) / (2*G.number_of_edges())
-        if uniform(0,1) < p:
-            G.add_edge(node1, node2)
-        deg = G.number_of_edges() / G.number_of_nodes()
-        
-    while deg > average_degree:
-        edge = (randint(0, number-1), randint(0, number-1))
-        if G.has_edge(edge[0],edge[1]):
-            G.remove_edge(*edge)
-            deg = G.number_of_edges() / G.number_of_nodes()
+    G = nx.scale_free_graph(n, alpha, beta, gamma, seed=sd)
 
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
