@@ -48,7 +48,7 @@ def generate_network(net_data, average_degree, coupling=1, cpl_mode='read'):
     couplings = sorted(couplings, key=lambda x: x[2])
     couplings = couplings[start_idx:]   
     for cpl in couplings:
-        if cpl_mode is 'homogenous':
+        if cpl_mode == 'homogenous':
             cpl_val = coupling
         else:
             cpl_val = cpl[2]
