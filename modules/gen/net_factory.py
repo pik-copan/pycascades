@@ -6,7 +6,7 @@ a random one is chosen for each node and edge respectively."""
 from core.tipping_network import tipping_network
 from core.coupling import linear_coupling
 
-from random import choice,uniform,randint,seed,shuffle
+from random import choice,uniform,randint,seed
 from copy import deepcopy
 import networkx as nx
 from math import sqrt,exp,ceil
@@ -120,17 +120,6 @@ def spatial_graph(number, beta, characteristic_length, element_pool,
         node[1]['pos'] = G.node[node[0]]['pos']
     return net
 
-def directed_configuration_model(original_network, element_pool,
-                                 coupling_pool, sd=None):
-    din=list(d for n, d in original_network.in_degree())
-    dout=list(d for n, d in original_network.out_degree())
-    G=nx.directed_configuration_model(din,dout, seed=sd)
-    G = nx.DiGraph(G)
-    G.remove_edges_from(nx.selfloop_edges(G))
-
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
-
 def random_reciprocity_model(number, p, reciprocity, element_pool,
                              coupling_pool, sd=None):
     G = nx.erdos_renyi_graph(number, p/2, directed=False, seed=sd)
@@ -178,5 +167,65 @@ def random_clustering_model(number, edge_number, clustering, element_pool,
                 G.add_edge(edge[0], edge[1])
                 break
     
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
+def directed_configuration_model(original_network, element_pool,
+                                 coupling_pool, sd=None):
+    din=list(d for n, d in original_network.in_degree())
+    dout=list(d for n, d in original_network.out_degree())
+    G=nx.directed_configuration_model(din,dout, seed=sd)
+    G = nx.DiGraph(G)
+    G.remove_edges_from(nx.selfloop_edges(G))
+
+    net = from_nxgraph(G, element_pool, coupling_pool)
+    return net
+
+def two_cluster_block_model(original_network, element_pool, coupling_pool, 
+                            sd=None):
+    comp = nx.algorithms.community.girvan_newman(original_network)
+    blocks =  [sorted(c) for c in next(comp)]
+    block_1 = blocks[0]
+    block_2 = blocks[1]
+    block_r = sum(blocks[2:], [])
+    size_list = [len(block_1), len(block_2), len(block_r)]
+    print(size_list)
+    edge_numbers = [[0, 0, 0], 
+                    [0, 0, 0], 
+                    [0, 0, 0]]
+    for edge in original_network.edges():
+        if edge[0] in block_1 and edge[1] in block_1:
+            edge_numbers[0][0] += 1
+        elif edge[0] in block_1 and edge[1] in block_2:
+            edge_numbers[0][1] += 1
+        elif edge[0] in block_1 and edge[1] in block_r:
+            edge_numbers[0][2] += 1
+        elif edge[0] in block_2 and edge[1] in block_1:
+            edge_numbers[1][1] += 1
+        elif edge[0] in block_2 and edge[1] in block_2:
+            edge_numbers[1][0] += 1
+        elif edge[0] in block_2 and edge[1] in block_r:
+            edge_numbers[1][2] += 1
+        elif edge[0] in block_r and edge[1] in block_1:
+            edge_numbers[2][0] += 1
+        elif edge[0] in block_r and edge[1] in block_2:
+            edge_numbers[2][1] += 1
+        elif edge[0] in block_r and edge[1] in block_r:
+            edge_numbers[2][2] += 1
+        else:
+            raise ValueError("Weird things happened!")
+    
+    probs = [[edge_numbers[0][0] / (size_list[0]*(size_list[0]-1)),
+              edge_numbers[0][1] / (size_list[0]*size_list[1]),
+              edge_numbers[0][2] / (size_list[0]*size_list[2])],
+             [edge_numbers[1][0] / (size_list[1]*size_list[0]),
+              edge_numbers[1][1] / (size_list[1]*(size_list[1]-1)),
+              edge_numbers[1][2] / (size_list[1]*size_list[2])],
+             [edge_numbers[2][0] / (size_list[2]*size_list[0]),
+              edge_numbers[2][1] / (size_list[2]*size_list[1]),
+              edge_numbers[2][2] / (size_list[2]*(size_list[2]-1))]]
+             
+    G = nx.stochastic_block_model(size_list, probs, directed=True, seed=sd)
+
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
