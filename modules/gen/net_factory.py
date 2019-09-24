@@ -181,15 +181,17 @@ def directed_configuration_model(original_network, element_pool,
     net = from_nxgraph(G, element_pool, coupling_pool)
     return net
 
-def two_cluster_block_model(original_network, element_pool, coupling_pool, 
+def two_cluster_block_model(original_network, 
+                            element_pool,
+                            coupling_pool, 
                             sd=None):
     comp = nx.algorithms.community.girvan_newman(original_network)
-    blocks =  [sorted(c) for c in next(comp)]
+    blocks =  sorted([sorted(c) for c in next(comp)])
     block_1 = blocks[0]
     block_2 = blocks[1]
     block_r = sum(blocks[2:], [])
     size_list = [len(block_1), len(block_2), len(block_r)]
-    print(size_list)
+
     edge_numbers = [[0, 0, 0], 
                     [0, 0, 0], 
                     [0, 0, 0]]
@@ -214,17 +216,17 @@ def two_cluster_block_model(original_network, element_pool, coupling_pool,
             edge_numbers[2][2] += 1
         else:
             raise ValueError("Weird things happened!")
-    
-    probs = [[edge_numbers[0][0] / (size_list[0]*(size_list[0]-1)),
+
+    probs = [[edge_numbers[0][0] / (size_list[0]*(size_list[0]-1)+1e-9),
               edge_numbers[0][1] / (size_list[0]*size_list[1]),
               edge_numbers[0][2] / (size_list[0]*size_list[2])],
              [edge_numbers[1][0] / (size_list[1]*size_list[0]),
-              edge_numbers[1][1] / (size_list[1]*(size_list[1]-1)),
+              edge_numbers[1][1] / (size_list[1]*(size_list[1]-1)+1e-9),
               edge_numbers[1][2] / (size_list[1]*size_list[2])],
              [edge_numbers[2][0] / (size_list[2]*size_list[0]),
               edge_numbers[2][1] / (size_list[2]*size_list[1]),
-              edge_numbers[2][2] / (size_list[2]*(size_list[2]-1))]]
-             
+              edge_numbers[2][2] / (size_list[2]*(size_list[2]-1)+1e-9)]]
+
     G = nx.stochastic_block_model(size_list, probs, directed=True, seed=sd)
 
     net = from_nxgraph(G, element_pool, coupling_pool)
