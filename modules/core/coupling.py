@@ -26,9 +26,6 @@ class coupling:
     def jac_diag(self):
         return lambda t, x_from , x_to : 0
 
-    def projection(self):
-        return lambda t : 1
-
 
 class linear_coupling(coupling):
     """Class for linear coupling
@@ -50,11 +47,7 @@ class linear_coupling(coupling):
     
     def jac_diag(self):
         return lambda t, x_from , x_to : 0
-
-    def bif_impact(self):
-        return lambda t, x_from , x_to : self._strength * x_from
 		
-
 
 class cusp_to_hopf(coupling):
     """Class for coupling """
@@ -75,9 +68,6 @@ class cusp_to_hopf(coupling):
     def jac_diag(self):
         """partial derivative with respect to r_to"""
         return lambda t, x_from, r_to : self._a*self._strength*x_from
-
-    def bif_impact(self):
-        return lambda t, x_from, r_to : self._strength*x_from
 
 
 class hopf_x_to_cusp(coupling):
@@ -102,12 +92,6 @@ class hopf_x_to_cusp(coupling):
         """partial derivative with respect to x_to"""
         return lambda t, r_from, x_to : 0
 
-    def projection(self):
-        return lambda t : math.cos(self._b*t)
-
-    def bif_impact(self):
-        return lambda t, r_from, x_to : self._strength*r_from*math.cos(self._b
-                                                                       *t)
 
 class hopf_y_to_cusp(coupling):
     """Class for coupling """
@@ -130,12 +114,6 @@ class hopf_y_to_cusp(coupling):
         """partial derivative with respect to x_to"""
         return lambda t, r_from, x_to : 0
 
-    def projection(self):
-        return lambda t : math.sin(self._b*t)
-
-    def bif_impact(self):
-        return lambda t, r_from, x_to : self._strength*r_from*math.sin(self._b
-                                                                       *t)
 
 class hopf_x_to_hopf(coupling):
     """Class for coupling """
@@ -157,12 +135,6 @@ class hopf_x_to_hopf(coupling):
         return lambda t, r_from, r_to : self._a_to*self._strength*r_from*\
                                         math.cos(self._b_from*t)
 
-    def projection(self):
-        return lambda t : math.cos(self._b_from*t)
-
-    def bif_impact(self):
-        return lambda t, r_from, r_to : self._strength*r_from*\
-                                        math.cos(self._b_from*t)
 
 class hopf_y_to_hopf(coupling):
     """Class for coupling """
@@ -184,10 +156,3 @@ class hopf_y_to_hopf(coupling):
     def jac_diag(self):
         return lambda t, r_from, r_to: self._a_to*self._strength*r_from*\
                                        math.sin(self._b_from * t)
-
-    def projection(self):
-        return lambda t : math.sin(self._b_from * t)
-
-    def bif_impact(self):
-        return lambda t, r_from, r_to : self._strength*r_from*\
-                                        math.sin(self._b_from*t)

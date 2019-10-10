@@ -1,6 +1,7 @@
+from copy import deepcopy
+
 import networkx as nx
 import numpy as np
-from copy import deepcopy
        
 class tipping_network(nx.DiGraph):
 
@@ -65,35 +66,10 @@ class tipping_network(nx.DiGraph):
             lmd_diag = edge[2]['lambda_jac_diag']
             jac[to_id, to_id] += lmd_diag.__call__( t, x[from_id], x[to_id] )
         return jac
-    
-    def set_vulnerability(self, node_id, bool_val):
-        self.node[node_id]["vulnerable"] = bool_val
 
-    def get_vulnerability_network(self):
-        G = nx.Graph()
-        for node in self.nodes():
-            G.add_node(node)
-            G.nodes[node]["vulnerable"] = self.nodes[node]["vulnerable"]
-        for edge in self.edges():
-                if self.node[edge[0]]["vulnerable"] and self.node[edge[1]]["vulnerable"]:
-                    G.add_edge(edge[0],edge[1])
-        return G
-        
     def get_out_component_size(self, from_id):
         out_component_size = -1
         for node in self.nodes():
             if nx.has_path(self, from_id, node):
                 out_component_size += 1
         return out_component_size
-    
-    def compute_impact_matrix(self):
-        n = self.number_of_nodes()
-        impact_matrix = [[lambda t, x1, x2: 0 for j in range(n)] for i in range(n)]
-        for edge in self.edges.data():
-            print(edge[2]['data'].bif_impact())
-            impact_matrix[edge[1]][edge[0]]=edge[2]['data'].bif_impact()
-            # if self.get_node_types()[edge[1]]=='cusp':
-            #     impact_matrix[edge[1]][edge[0]]=edge['data'].dxdt_cpl()
-            # elif self.get_node_types()[edge[1]]=='hopf':
-            #     impact_matrix[edge[1]][edge[0]]=edge['data']
-        return impact_matrix
