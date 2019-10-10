@@ -1,259 +1,226 @@
-"""net_factory module that provides functions to generate networks.
+"""net_factory module that provides factory classes to generate networks.
 Some generators have to be supplied with element and coupling pools,
 which are supposed to be lists of element and coupling objects from which
-a random one is chosen for each node and edge respectively."""
-
+a random one is chosen for each node and each link, respectively."""
 from core.tipping_network import tipping_network
-from core.coupling import linear_coupling
 
-from random import choice,uniform,randint,seed
-from copy import deepcopy
-import networkx as nx
+from random import choice,uniform,randint
+from random import seed as set_seed
 from math import sqrt,exp,ceil
-import numpy as np
+from copy import deepcopy
 
-def from_nxgraph( G, element_pool, coupling_pool, coupling=None, sd=None):
-
-    if not nx.is_directed(G):
-        raise ValueError("Only directed graphs supported!")
-
-    couplings = []
-    if coupling == 'uniform':
-        seed_list=np.random.randint(0,100*G.number_of_edges(),
-                                    size=G.number_of_edges())
-        for ind in range(G.number_of_edges()):
-            seed(seed_list[ind])
-            strength = uniform(coupling_pool[0],coupling_pool[1])
-            couplings.append( linear_coupling( strength ) )
-    else:
-        for ind in range(G.number_of_edges()):
-            couplings.append( choice(coupling_pool) )
+import networkx as nx
 
 
-    net = tipping_network()
-
-    for node in G.nodes():
-        net.add_element(choice(element_pool))
-
-    for ind, edge in enumerate(G.edges()):
-        net.add_coupling( edge[0], edge[1], couplings[ind] )
-
-    return net
-
-def complete_graph( number, element_pool, coupling_pool):
-    G = nx.complete_graph(number, nx.DiGraph())
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
-
-def directed_watts_strogatz_graph(n, degree, beta, element_pool, coupling_pool,
-                                  sd=None):
-    k = ceil(degree/2)*2
-    if k > n:
-        raise nx.NetworkXError("k>n, choose smaller k or larger n")
+class net_factory:
+    """Abstract net_factory. Derive concrete network generators from this 
+    class"""
+    def __init__(self, element_pool, coupling_pool, seed=None):
+        self._element_pool = element_pool
+        self._coupling_pool = coupling_pool
+        self._seed = seed
+        if self._seed:
+            set_seed(self._seed)
     
-    #If k == n, the graph is complete not Watts-Strogatz
-    if k == n:
-        return nx.complete_graph(n)
+    def _from_nxgraph(self):
+        if not self._G:
+            raise ValueError("Networkx graph has to be generated first!")
+        if not nx.is_directed(self._G):
+            raise ValueError("Only directed graphs supported!")
 
-    G = nx.Graph()
-    nodes = list(range(n))  # nodes are labeled 0 to n-1
-    # connect each node to k/2 neighbors
-    for j in range(1, k // 2 + 1):
-        targets = nodes[j:] + nodes[0:j]  # first j nodes are now last in list
-        G.add_edges_from(zip(nodes, targets))
-    
-    G = nx.DiGraph(G)
-    
-    while (G.number_of_edges()/G.number_of_nodes()) > degree:
-        G.remove_edge(*choice(list(G.edges())))
+        couplings = []
+        for ind in range(self._G.number_of_edges()):
+            couplings.append(choice(self._coupling_pool))
 
-    edges = deepcopy(G.edges())
-    
-    for edge in edges:
-        if uniform(0,1) < beta:
-            G.remove_edge(edge[0],edge[1])
-            while True:
-                edge = (randint(0, G.number_of_nodes()-1), 
-                        randint(0, G.number_of_nodes()-1))
-                if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
-                    G.add_edge(edge[0], edge[1])
-                    break   
-    
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
+        self._net = tipping_network()
 
-def directed_barabasi_albert_graph(number, average_degree, element_pool, 
-                                   coupling_pool, sd=None):
-    G = G=nx.DiGraph()
-    G.add_nodes_from([0,1])
-    G.add_edges_from([(0,1),(1,0)])
+        for node in self._G.nodes():
+            self._net.add_element(choice(self._element_pool))
 
-    while G.number_of_nodes() < number:
-        ind = G.number_of_nodes()
-        G.add_node( ind )
-        for node in G.nodes:
-            p = G.degree(node) / G.number_of_edges()
-            if uniform(0,1) < p:
-                G.add_edge( ind, node)
-            if uniform(0,1) < p:
-                G.add_edge( node, ind)
-    
-    deg = G.number_of_edges() / G.number_of_nodes()
-    while deg < average_degree:
-        node1 = randint(0, number-1)
-        node2 = randint(0, number-1)
-        if node1 == node2:
-            continue
-        p = (G.degree(node1) + G.degree(node2)) / (2*G.number_of_edges())
-        if uniform(0,1) < p:
-            G.add_edge(node1, node2)
-        deg = G.number_of_edges() / G.number_of_nodes()
+        for ind, edge in enumerate(self._G.edges()):
+            self._net.add_coupling(edge[0], edge[1], couplings[ind])
+
+    def create(self):
+        return None
+
+class complete_graph(net_factory):
+    def create(self, node_number):
+        self._G = nx.complete_graph(node_number, nx.DiGraph())
+        self._from_nxgraph()
+        return self._net
+
+class erdos_renyi_graph(net_factory):
+    def create(self, node_number, link_probability):
+        self._G = nx.erdos_renyi_graph(node_number,
+                                       link_probability,
+                                       directed = True,
+                                       seed = self._seed)
         
-    while deg > average_degree:
-        edge = (randint(0, number-1), randint(0, number-1))
-        if G.has_edge(edge[0],edge[1]):
-            G.remove_edge(*edge)
-            deg = G.number_of_edges() / G.number_of_nodes()
+        self._from_nxgraph()
+        return self._net
 
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
-
-"""Spatial Graph generated with the Waxman model on a two-dimensional plane"""
-def spatial_graph(number, beta, characteristic_length, element_pool,
-                  coupling_pool, sd=None):
+class directed_watts_strogatz_graph(net_factory):
+    def create(self, node_number, degree, beta):
+        k = ceil(degree/2)*2
+        if k > node_number:
+            raise nx.NetworkXError("k>n, choose smaller k or larger n")
     
-    G = nx.complete_graph(number, nx.DiGraph())
+        #If k == n, the graph is complete not Watts-Strogatz
+        if k == node_number:
+            return nx.complete_graph(node_number)
+
+        self._G = nx.Graph()
+        nodes = list(range(node_number))  # nodes are labeled 0 to n-1
+        # connect each node to k/2 neighbors
+        for j in range(1, k // 2 + 1):
+            # make first j nodes last in list
+            targets = nodes[j:] + nodes[0:j]
+            self._G.add_edges_from(zip(nodes, targets))
+            
+        self._G = nx.DiGraph(self._G)
     
-    for node in G.nodes(data=True):
-        node[1]['pos'] = (uniform(0,1), uniform(0,1))
+        while (self._G.number_of_edges()/self._G.number_of_nodes()) > degree:
+            self._G.remove_edge(*choice(list(self._G.edges())))
+
+        edges = deepcopy(self._G.edges())
     
-    remove = []
-    for edge in G.edges():
-        dist = sqrt(pow(G.node[edge[1]]['pos'][0] - 
-                        G.node[edge[0]]['pos'][0], 2) +
-                    pow(G.node[edge[1]]['pos'][1] - 
-                        G.node[edge[0]]['pos'][1], 2))
+        for edge in edges:
+            if uniform(0,1) < beta:
+                self._G.remove_edge(edge[0],edge[1])
+                while True:
+                    edge = (randint(0, self._G.number_of_nodes()-1), 
+                            randint(0, self._G.number_of_nodes()-1))
+                    if not self._G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
+                        self._G.add_edge(edge[0], edge[1])
+                        break   
+
+        self._from_nxgraph()
+        return self._net
+
+class directed_barabasi_albert_graph(net_factory):
+    def create(self, node_number, average_degree):
+        self._G = nx.DiGraph()
+        self._G.add_nodes_from([0,1])
+        self._G.add_edges_from([(0,1),(1,0)])
+
+        while self._G.number_of_nodes() < node_number:
+            ind = self._G.number_of_nodes()
+            self._G.add_node( ind )
+            for node in self._G.nodes:
+                p = self._G.degree(node) / self._G.number_of_edges()
+                if uniform(0,1) < p:
+                    self._G.add_edge( ind, node)
+                if uniform(0,1) < p:
+                    self._G.add_edge( node, ind)
     
-        probability = 1 - beta*exp(-dist/characteristic_length)
-        if uniform(0,1) < probability:
-            remove.append(edge)
+        deg = self._G.number_of_edges() / self._G.number_of_nodes()
+        while deg < average_degree:
+            node1 = randint(0, node_number-1)
+            node2 = randint(0, node_number-1)
+            if node1 == node2:
+                continue
+            p = (self._G.degree(node1) + self._G.degree(node2)) / \
+                (2*self._G.number_of_edges())
+            if uniform(0,1) < p:
+                self._G.add_edge(node1, node2)
+            deg = self._G.number_of_edges() / self._G.number_of_nodes()
+        
+        while deg > average_degree:
+            edge = (randint(0, node_number-1), randint(0, node_number-1))
+            if self._G.has_edge(edge[0],edge[1]):
+                self._G.remove_edge(*edge)
+                deg = self._G.number_of_edges() / self._G.number_of_nodes()
 
-    for edge in remove:
-        G.remove_edge(*edge)
+        self._from_nxgraph()
+        return self._net
 
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    for node in net.nodes(data=True):
-        node[1]['pos'] = G.node[node[0]]['pos']
-    return net
-
-def random_reciprocity_model(number, p, reciprocity, element_pool,
-                             coupling_pool, sd=None):
-    G = nx.erdos_renyi_graph(number, p/2, directed=False, seed=sd)
-    G = nx.DiGraph(G)
+class waxman_graph(net_factory):
+    """Generate spatial graph with the Waxman model 
+    on a two-dimensional plane"""
+    def create(self, node_number, beta, characteristic_length):
     
-    if sd:
-        seed(2*sd)
-    while nx.reciprocity(G) > reciprocity:
-        edge = choice(list(G.edges()))
-        G.remove_edge(*edge)
-        while True:
-            edge = (randint(0, G.number_of_nodes()-1), 
-                    randint(0, G.number_of_nodes()-1))
-            if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
-                G.add_edge(edge[0], edge[1])
-                break
+        self._G = nx.complete_graph(node_number, nx.DiGraph())
     
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
-
-def random_clustering_model(number, edge_number, clustering, element_pool,
-                            coupling_pool, sd=None):
-    if sd:
-        seed(2*sd)
+        for node in self._G.nodes(data=True):
+            node[1]['pos'] = (uniform(0,1), uniform(0,1))
     
-    G = nx.empty_graph(number, create_using=nx.DiGraph())
+        remove = []
+        for edge in self._G.edges():
+            dist = sqrt(pow(self._G.node[edge[1]]['pos'][0] - 
+                            self._G.node[edge[0]]['pos'][0], 2) +
+                        pow(self._G.node[edge[1]]['pos'][1] - 
+                            self._G.node[edge[0]]['pos'][1], 2))
     
-    while G.number_of_edges() < edge_number:
-        n1 = randint(0, G.number_of_nodes()-1)
-        n2 = randint(0, G.number_of_nodes()-1)
-        n3 = randint(0, G.number_of_nodes()-1)
-        if not (n1 == n2 or n2 == n3 or n1 == n3):
-            G.add_edges_from([(n1,n2),(n2,n1),(n2,n3),(n3,n2),(n3,n1),(n1,n3)])
+            probability = 1 - beta*exp(-dist/characteristic_length)
+            if uniform(0,1) < probability:
+                remove.append(edge)
 
-    if nx.average_clustering(G) < clustering:
-        raise ValueError("Clustering too large too achieve!")
+        for edge in remove:
+            self._G.remove_edge(*edge)
 
-    while nx.average_clustering(G) > clustering:
-        edge = choice(list(G.edges()))
-        G.remove_edge(*edge)
-        while True:
-            edge = (randint(0, G.number_of_nodes()-1), 
-                    randint(0, G.number_of_nodes()-1))
-            if not G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
-                G.add_edge(edge[0], edge[1])
-                break
+        self._from_nxgraph()
+        for node in self._net.nodes(data=True):
+            node[1]['pos'] = self._G.node[node[0]]['pos']
+        return self._net
+
+class random_reciprocity_graph(net_factory):
+    def create(self, node_number, link_probability, reciprocity):
+        self._G = nx.erdos_renyi_graph(node_number,
+                                       link_probability/2,
+                                       directed=False,
+                                       seed=self._seed)
+        self._G = nx.DiGraph(self._G)
+
+        while nx.reciprocity(self._G) > reciprocity:
+            edge = choice(list(self._G.edges()))
+            self._G.remove_edge(*edge)
+            while True:
+                edge = (randint(0, self._G.number_of_nodes()-1), 
+                        randint(0, self._G.number_of_nodes()-1))
+                if not self._G.has_edge(edge[0], edge[1]) and edge[0] != edge[1]:
+                    self._G.add_edge(edge[0], edge[1])
+                    break
     
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
+        self._from_nxgraph()
+        return self._net
 
-def directed_configuration_model(original_network, element_pool,
-                                 coupling_pool, sd=None):
-    din=list(d for n, d in original_network.in_degree())
-    dout=list(d for n, d in original_network.out_degree())
-    G=nx.directed_configuration_model(din,dout, seed=sd)
-    G = nx.DiGraph(G)
-    G.remove_edges_from(nx.selfloop_edges(G))
+class random_clustering_graph(net_factory):
+    def create(self, node_number, edge_number, clustering):
+        self._G = nx.empty_graph(node_number, create_using=nx.DiGraph())
+    
+        while self._G.number_of_edges() < edge_number:
+            n1 = randint(0, self._G.number_of_nodes()-1)
+            n2 = randint(0, self._G.number_of_nodes()-1)
+            n3 = randint(0, self._G.number_of_nodes()-1)
+            if not (n1 == n2 or n2 == n3 or n1 == n3):
+                self._G.add_edges_from([(n1,n2),(n2,n1),(n2,n3),
+                                        (n3,n2),(n3,n1),(n1,n3)])
 
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
+        if nx.average_clustering(self._G) < clustering:
+            raise ValueError("Clustering too large too achieve!")
 
-def two_cluster_block_model(original_network, 
-                            element_pool,
-                            coupling_pool, 
-                            sd=None):
-    comp = nx.algorithms.community.girvan_newman(original_network)
-    blocks =  sorted([sorted(c) for c in next(comp)])
-    block_1 = blocks[0]
-    block_2 = blocks[1]
-    block_r = sum(blocks[2:], [])
-    size_list = [len(block_1), len(block_2), len(block_r)]
+        while nx.average_clustering(self._G) > clustering:
+            edge = choice(list(self._G.edges()))
+            self._G.remove_edge(*edge)
+            while True:
+                edge = (randint(0, self._G.number_of_nodes()-1), 
+                        randint(0, self._G.number_of_nodes()-1))
+                if not self._G.has_edge(edge[0], edge[1]) and \
+                       edge[0] != edge[1]:
+                    self._G.add_edge(edge[0], edge[1])
+                    break
+    
+        self._from_nxgraph()
+        return self._net
 
-    edge_numbers = [[0, 0, 0], 
-                    [0, 0, 0], 
-                    [0, 0, 0]]
-    for edge in original_network.edges():
-        if edge[0] in block_1 and edge[1] in block_1:
-            edge_numbers[0][0] += 1
-        elif edge[0] in block_1 and edge[1] in block_2:
-            edge_numbers[0][1] += 1
-        elif edge[0] in block_1 and edge[1] in block_r:
-            edge_numbers[0][2] += 1
-        elif edge[0] in block_2 and edge[1] in block_1:
-            edge_numbers[1][1] += 1
-        elif edge[0] in block_2 and edge[1] in block_2:
-            edge_numbers[1][0] += 1
-        elif edge[0] in block_2 and edge[1] in block_r:
-            edge_numbers[1][2] += 1
-        elif edge[0] in block_r and edge[1] in block_1:
-            edge_numbers[2][0] += 1
-        elif edge[0] in block_r and edge[1] in block_2:
-            edge_numbers[2][1] += 1
-        elif edge[0] in block_r and edge[1] in block_r:
-            edge_numbers[2][2] += 1
-        else:
-            raise ValueError("Weird things happened!")
+class directed_configuration_model(net_factory):
+    def create(self, original_network):
+        din=list(d for n, d in original_network.in_degree())
+        dout=list(d for n, d in original_network.out_degree())
 
-    probs = [[edge_numbers[0][0] / (size_list[0]*(size_list[0]-1)+1e-9),
-              edge_numbers[0][1] / (size_list[0]*size_list[1]),
-              edge_numbers[0][2] / (size_list[0]*size_list[2])],
-             [edge_numbers[1][0] / (size_list[1]*size_list[0]),
-              edge_numbers[1][1] / (size_list[1]*(size_list[1]-1)+1e-9),
-              edge_numbers[1][2] / (size_list[1]*size_list[2])],
-             [edge_numbers[2][0] / (size_list[2]*size_list[0]),
-              edge_numbers[2][1] / (size_list[2]*size_list[1]),
-              edge_numbers[2][2] / (size_list[2]*(size_list[2]-1)+1e-9)]]
+        self._G = nx.directed_configuration_model(din, dout, seed=self._seed)
+        self._G = nx.DiGraph(self._G)
+        self._G.remove_edges_from(nx.selfloop_edges(self._G))
 
-    G = nx.stochastic_block_model(size_list, probs, directed=True, seed=sd)
-
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
+        self._from_nxgraph()
+        return self._net
