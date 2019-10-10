@@ -1,4 +1,5 @@
 from scipy.integrate import odeint
+from sdeint import itoint
 import numpy as np
 import time
 
@@ -7,7 +8,7 @@ class NoEquilibrium(Exception):
     pass
 
 class evolve():
-    def __init__( self, tipping_network, initial_state ):
+    def __init__(self, tipping_network, initial_state):
         # Initialize solver
         self._net = tipping_network
         # Initialize state
@@ -17,33 +18,43 @@ class evolve():
         self._t = 0
         self._x = initial_state
         
-        self.save_state( self._t, self._x ) 
+        self.save_state(self._t, self._x)
         
-    def save_state( self , t, x):
+    def save_state(self , t, x):
         """Save current state if save flag is set"""
-        self._times.append( t )
-        self._states.append( x )
+        self._times.append(t)
+        self._states.append(x)
     
-    def get_timeseries( self ):
-        times = np.array ( self._times )
-        states = np.array ( self._states )
+    def get_timeseries(self):
+        times = np.array (self._times)
+        states = np.array (self._states)
         return times , states
         
-    def _integrate( self, t_step ):
+    def _integrate(self, t_step):
         
-        t_span = [ self._t , self._t + t_step ]
+        t_span = [self._t , self._t + t_step ]
         x_init = self._x
-        sol = odeint( self._net.f , x_init, t_span, Dfun=self._net.jac )
+        sol = odeint(self._net.f , x_init, t_span, Dfun=self._net.jac)
         self._t = t_span[1]
         self._x = sol[1]
         self.save_state(self._t, self._x)
         
-    def integrate( self, t_step, t_end ):
+    def integrate(self, t_step, t_end):
         """Manually integrate to t_end"""
         while self._times[-1] < t_end:
             self._integrate( t_step )
+            
+class evolve_ode(evolve):          
+    def _integrate(self, t_step):
+        
+        t_span = [self._t , self._t + t_step ]
+        x_init = self._x
+        sol = odeint(self._net.f , x_init, t_span, Dfun=self._net.jac)
+        self._t = t_span[1]
+        self._x = sol[1]
+        self.save_state(self._t, self._x)
     
-    def equilibrate( self, tol , t_step, t_break=None ):
+    def equilibrate(self, tol , t_step, t_break=None ):
         """Iterate system until it is in equilibrium. 
         After every iteration it is checked if the system is in a stable
         equilibrium"""
@@ -57,7 +68,7 @@ class evolve():
                         " Increase tolerance or breaktime."
                         )
    
-    def is_equilibrium( self, tol ):
+    def is_equilibrium(self, tol):
         """Check if the system is in an equilibrium state, e.g. if the 
         absolute value of all elements of f_prime is less than tolerance. 
         If True the state can be considered as close to a fixed point"""
@@ -70,7 +81,7 @@ class evolve():
         else:
             return False
 
-    def is_stable( self ):
+    def is_stable(self):
         """Check stability of current system state by calculating the 
         eigenvalues of the jacobian (all eigenvalues < 0 => stable)."""
         n = self._net.number_of_nodes()
@@ -82,3 +93,16 @@ class evolve():
             return True
         else:
             return False
+
+class evolve_sde(evolve):
+    def __init__(self, tipping_network, initial_state, noise_strength ):
+        super().__init__(tipping_network, initial_state)
+        self._noise_strength = lambda t, x: np.diag(noise_strength)
+
+    def _integrate(self, t_step):
+        t_span = [self._t , self._t + t_step ]
+        x_init = self._x
+        sol = itoint(self._net.f, self._noise_strength, x_init, t_span)
+        self._t = t_span[1]
+        self._x = sol[1]
+        self.save_state(self._t, self._x)
