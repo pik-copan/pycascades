@@ -84,28 +84,13 @@ while not net.get_tip_states(ev.get_timeseries()[1][-1,:]).any():
     c = net.node[0]['data'].get_par()['c']
     net.set_param( 0, 'c', c+dc )
 
-p=plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:]
-                , legend=True).show()
+p = plotter.series(ev.get_timeseries()[0], ev.get_timeseries()[1][:,:], 
+                   legend=True).show()
     
 """Create networks with the net_factory module"""
-from gen import net_factory as nfac
-"""Same two node network as above"""
-net = nfac.pair( cusp_element_0, cusp_element_1, coupling_0)
-plotter.network(net).show()
-
-"""Chain, ring and shamrock structure"""
-net = nfac.k_chain( 5, 2, element_pool = [cusp_element_0]
-                      , coupling_pool = [coupling_0] )
-plotter.network(net).show()
-net = nfac.k_ring( 5, 3, element_pool = [cusp_element_0]
-                   , coupling_pool = [coupling_0] )
-plotter.network(net).show()
-net = nfac.shamrock( 4, 3, element_pool = [cusp_element_0]
-                   , coupling_pool = [coupling_0] )
-plotter.network(net).show()
-
-"""Use networkx graph generator"""
 from networkx import erdos_renyi_graph
+from gen import net_factory as nfac
+
 G = erdos_renyi_graph(10, 0.25, directed = True, seed = None)
 net = nfac.from_nxgraph( G, element_pool = [cusp_element_0]
                           , coupling_pool = (0,0.2), coupling = 'uniform')
