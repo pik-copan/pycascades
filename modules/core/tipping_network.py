@@ -11,8 +11,8 @@ class tipping_network(nx.DiGraph):
         tipping_element = deepcopy(tipping_element)
         ind = self.number_of_nodes()
         super().add_node( ind, data = tipping_element )
-        self.node[ind]['lambda_f'] = tipping_element.dxdt_diag()
-        self.node[ind]['lambda_jac'] = tipping_element.jac_diag()
+        self.nodes[ind]['lambda_f'] = tipping_element.dxdt_diag()
+        self.nodes[ind]['lambda_jac'] = tipping_element.jac_diag()
         
     def add_coupling( self, from_id, to_id, coupling):
         coupling = deepcopy(coupling)
@@ -22,17 +22,17 @@ class tipping_network(nx.DiGraph):
         self[from_id][to_id]['lambda_jac_diag'] = coupling.jac_diag()
 
     def set_param( self, node_id, key, val ):
-        element = self.node[node_id]['data']
+        element = self.nodes[node_id]['data']
         element.set_par( key, val)
-        self.node[node_id]['lambda_f'] = self.node[node_id]['data'].dxdt_diag()
-        self.node[node_id]['lambda_jac'] = self.node[node_id]['data'].jac_diag()
+        self.nodes[node_id]['lambda_f'] = self.nodes[node_id]['data'].dxdt_diag()
+        self.nodes[node_id]['lambda_jac'] = self.nodes[node_id]['data'].jac_diag()
 
     def get_tip_states( self, x):
-        tipped = [self.node[i]['data'].tip_state()(x[i]) for i in self.nodes()]
+        tipped = [self.nodes[i]['data'].tip_state()(x[i]) for i in self.nodes()]
         return np.array( tipped )
 
     def get_node_types( self ):
-        type_list = [self.node[i]['data'].get_type() for i in self.nodes()]
+        type_list = [self.nodes[i]['data'].get_type() for i in self.nodes()]
         return type_list
         
     def get_number_tipped( self, x):
@@ -67,7 +67,7 @@ class tipping_network(nx.DiGraph):
         return jac
     
     def set_vulnerability(self, node_id, bool_val):
-        self.node[node_id]["vulnerable"] = bool_val
+        self.nodes[node_id]["vulnerable"] = bool_val
 
     def get_vulnerability_network(self):
         G = nx.Graph()
@@ -75,7 +75,7 @@ class tipping_network(nx.DiGraph):
             G.add_node(node)
             G.nodes[node]["vulnerable"] = self.nodes[node]["vulnerable"]
         for edge in self.edges():
-                if self.node[edge[0]]["vulnerable"] and self.node[edge[1]]["vulnerable"]:
+                if self.nodes[edge[0]]["vulnerable"] and self.nodes[edge[1]]["vulnerable"]:
                     G.add_edge(edge[0],edge[1])
         return G
         

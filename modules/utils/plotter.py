@@ -3,7 +3,6 @@
 Provide functions to generate some useful plots.
 """
 from matplotlib.colors import LinearSegmentedColormap
-from scipy import stats
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -119,37 +118,4 @@ def stability(net,xrange,yrange):
     plt.contourf(x, y, stability,levels=[-0.5,0.5,1.5,2.5],cmap=cmp)
 
     plt.colorbar(ticks=[0,1,2])
-    return plt
-
-def cascade_size(csv_file, x_var, y_var, par):
-    # local pandas import
-    import pandas as pd
-    
-    df = pd.read_csv(csv_file)
-    df_random = df
-    
-    x_vars = np.sort(df_random[x_var])
-    x_vars = np.unique( x_vars.round(decimals=4) )
-    par_vals = np.sort(df_random[par].unique())
-
-    for p in par_vals:
-        rows = df_random.loc[df_random[par] == p]
-        cascade_size = np.array([])
-        cascade_size_stderr = np.array([])
-        for x in x_vars:
-            x_rows = rows[rows[x_var].apply(np.isclose, b=x, atol=0.001)]
-            cascade_size = np.append(cascade_size,
-                                     x_rows[y_var].mean())
-            cascade_size_stderr = np.append(cascade_size_stderr,
-                                            stats.sem(x_rows[y_var]))
-    
-        mask = np.isfinite(cascade_size)
-        plt.errorbar(x_vars[mask], 
-                     cascade_size[mask],
-                     yerr = cascade_size_stderr[mask],
-                     xerr = None,
-                     fmt='x-',
-                     capsize=3,
-                     label=p)
-    
     return plt

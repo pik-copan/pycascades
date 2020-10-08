@@ -1,0 +1,1 @@
+python r_crit_unstable_amazon.py $SLURM_NTASKS 2003
