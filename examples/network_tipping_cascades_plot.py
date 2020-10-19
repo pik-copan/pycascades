@@ -28,9 +28,9 @@ sys.path.append('../modules/gen')
 sys.path.append('../modules/core')
 
 
-from net_factory import from_nxgraph
-from net_factory import directed_watts_strogatz_graph
-from net_factory import directed_barabasi_albert_graph
+from networks import from_nxgraph
+from networks import directed_watts_strogatz_graph
+from networks import directed_barabasi_albert_graph
 #from amazon_motif_module import generate_network
 from evolve import evolve, NoEquilibrium
 from tipping_element import cusp

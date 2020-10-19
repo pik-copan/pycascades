@@ -191,3 +191,22 @@ class hopf_y_to_hopf(coupling):
     def bif_impact(self):
         return lambda t, r_from, r_to : self._strength*r_from*\
                                         math.sin(self._b_from*t)
+
+class linear_coupling_earth_system(coupling):
+
+    def __init__(self, strength, x_0):
+        coupling.__init__(self)
+        self._strength = strength
+        self._x_0 = x_0
+
+    def dxdt_cpl(self):
+        return lambda t, x_from, x_to: self._strength * (x_from - self._x_0)
+
+    def jac_cpl(self):
+        return lambda t, x_from, x_to: self._strength
+
+    def jac_diag(self):
+        return lambda t, x_from, x_to: 0
+
+    def bif_impact(self):
+        return lambda t, x_from, x_to; self._strength * (x_from - self._x_0)

@@ -29,7 +29,7 @@ sys.path.append('../modules/utils')
 
 
 import networkx as nx
-import net_factory as nfac
+import networks as nfac
 import plotter
 from tipping_element import cusp
 from coupling import linear_coupling

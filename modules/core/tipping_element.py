@@ -108,13 +108,12 @@ class hopf(tipping_element):
     Implementation using a representation with polar coordinates:
     dr/dt=(bif_par-r^2)*r*a, dphi/dt=b (time-dependence of angle)"""
 
-    def __init__(self, a, b, c):
+    def __init__(self, a, c):
         """Constructor with additional parameters for (half a) Hopf
         element"""
         super().__init__()
         self._type = 'hopf'
         self._par['a'] = a
-        self._par['b'] = b
         self._par['c'] = c
 
     def dxdt_diag(self):

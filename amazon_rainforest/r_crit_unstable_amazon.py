@@ -29,7 +29,7 @@ sys.path.append('../modules/gen')
 sys.path.append('../modules/core')
 sys.path.append('amazon_code')
 
-from net_factory import from_nxgraph
+from networks import from_nxgraph
 #from gen.net_factory import from_nxgraph
 from amazon import generate_network
 from evolve import evolve, NoEquilibrium
