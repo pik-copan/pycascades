@@ -209,4 +209,4 @@ class linear_coupling_earth_system(coupling):
         return lambda t, x_from, x_to: 0
 
     def bif_impact(self):
-        return lambda t, x_from, x_to; self._strength * (x_from - self._x_0)
+        return lambda t, x_from, x_to: self._strength * (x_from - self._x_0)

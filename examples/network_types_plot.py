@@ -26,6 +26,7 @@ import sys
 sys.path.append('../modules/gen')
 sys.path.append('../modules/core')
 sys.path.append('../modules/utils')
+sys.path.insert(0,"../modules")
 
 
 import networkx as nx

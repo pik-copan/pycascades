@@ -28,6 +28,7 @@ import sys
 sys.path.append('../modules/gen')
 sys.path.append('../modules/core')
 sys.path.append('amazon_code')
+sys.path.insert(0,"../modules")
 
 from networks import from_nxgraph
 #from gen.net_factory import from_nxgraph

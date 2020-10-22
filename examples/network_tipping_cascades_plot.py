@@ -26,7 +26,7 @@ sns.set_style("white")
 import sys
 sys.path.append('../modules/gen')
 sys.path.append('../modules/core')
-
+sys.path.insert(0,"../modules")
 
 from networks import from_nxgraph
 from networks import directed_watts_strogatz_graph
