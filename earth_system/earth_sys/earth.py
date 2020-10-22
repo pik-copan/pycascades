@@ -9,7 +9,7 @@ import numpy as np
 # private imports from sys.path
 from coupling import linear_coupling_earth_system
 from tipping_element import cusp
-from tipping_network import tipping_network
+from earth_sys.tipping_network_earth_system import tipping_network
 from earth_sys.functions_earth_system import global_functions
 
 """

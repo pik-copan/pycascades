@@ -10,11 +10,10 @@ sys.path.append('../../modules/gen')
 
 import numpy as np
 from tipping_element import cusp
-from tipping_network import tipping_network
 from coupling import linear_coupling_earth_system
 from evolve import evolve
 from earth_sys.functions_earth_system import global_functions
-
+from earth_sys.tipping_network_earth_system import tipping_network
 
 
 class timing():
