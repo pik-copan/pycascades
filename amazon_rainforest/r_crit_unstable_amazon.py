@@ -78,7 +78,7 @@ year = sys_var[0]
 r_critical = np.arange(1700, 1800, 100)
 
 
-data_eval = np.sort(np.array(glob.glob("test_data/*{}*.nc".format(year)))) #tree transpiration and interception evaporation
+data_eval = np.sort(np.array(glob.glob("data/*{}*.nc".format(year)))) #tree transpiration and interception evaporation
 
 print(data_eval)
 

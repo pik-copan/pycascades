@@ -58,8 +58,8 @@ while net.number_of_edges() / net.number_of_nodes() < 2.9 or net.number_of_edges
 #Matplotlib Specifications
 plt.xticks([])
 plt.yticks([])
-plotter.network(net).savefig('figures/er.png')
-plotter.network(net).savefig('figures/er.pdf')
+#plotter.network(net).savefig('figures/er.png')
+#plotter.network(net).savefig('figures/er.pdf')
 plotter.network(net).show()
 #Average Degree
 av_degree = net.number_of_edges() / net.number_of_nodes()
@@ -71,8 +71,8 @@ net = nfac.directed_watts_strogatz_graph(size, degree, rewiring_ws, element_pool
 #Matplotlib Specifications
 plt.xticks([])
 plt.yticks([])
-plotter.network(net).savefig('figures/ws.png')
-plotter.network(net).savefig('figures/ws.pdf')
+#plotter.network(net).savefig('figures/ws.png')
+#plotter.network(net).savefig('figures/ws.pdf')
 plotter.network(net).show()
 #Average Degree
 av_degree = net.number_of_edges() / net.number_of_nodes()
@@ -84,8 +84,8 @@ net = nfac.directed_barabasi_albert_graph(size, degree, element_pool = [cusp_ele
 #Matplotlib Specifications
 plt.xticks([])
 plt.yticks([])
-plotter.network(net).savefig('figures/ba.png')
-plotter.network(net).savefig('figures/ba.pdf')
+#plotter.network(net).savefig('figures/ba.png')
+#plotter.network(net).savefig('figures/ba.pdf')
 plotter.network(net).show()
 #Average degree
 av_degree = net.number_of_edges() / net.number_of_nodes()
