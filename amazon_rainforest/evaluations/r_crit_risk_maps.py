@@ -134,7 +134,7 @@ else:
 	directory = "../results/no_coupling/"
 
 
-years = np.arange(2003, 2015, 1)
+years = np.arange(2003, 2004, 1)
 
 
 output = []
