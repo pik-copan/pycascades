@@ -37,5 +37,5 @@ cartopy, copy, csv, glob, itertools, math, matplotlib, netCDF4, networkx, numpy,
 
 ## Licence
 
-pycascades is licenced under the BSD 2-Clause License.
+pycascades is licenced under the BSD 3-Clause License.
 See the `LICENSE` file for further information. 
