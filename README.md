@@ -17,7 +17,7 @@ pycascades has been used in analyses supporting the following publications:
 
 1) N. Wunderling*, B. Stumpf*, J. Krönke, A. Staal, O. Tuinenburg, R. Winkelmann and J.F. Donges, 2020, [How motifs condition critical thresholds for tipping cascades in complex networks: Linking Micro- to Macro-scales](https://aip.scitation.org/doi/10.1063/1.5142827), Chaos: An Interdisciplinary Journal of Nonlinear Science, 30(4), 043129. *These authors share the first authorship.
 
-2) J. Krönke, N. Wunderling, R. Winkelmann, A. Staal, B. Stumpf, O.A. Tuinenburg, J.F. Donges, 2020, [Dynamics of tipping cascades on complex networks](Dynamics of tipping cascades on complex networks), Physical Review E, 101(4), p.042311
+2) J. Krönke, N. Wunderling, R. Winkelmann, A. Staal, B. Stumpf, O.A. Tuinenburg, J.F. Donges, 2020, [Dynamics of tipping cascades on complex networks](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.101.042311), Physical Review E, 101(4), p.042311
 
 3) N. Wunderling, J.F. Donges, J. Kurths and R. Winkelmann, [Interacting tipping elements increase risk of climate domino effects under global warming](https://esd.copernicus.org/preprints/esd-2020-18/), in review (2020).
 
