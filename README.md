@@ -32,7 +32,7 @@ The development of pycascades has been supported by the Leibniz Association (pro
 ## Prerequisites
 
 The following Python 3.x packages are needed to run pycascades:
-cartopy, copy, csv, glob, itertools, math, matplotlib, netCDF4, networkx, numpy, os, PyPDF2, re, scipy (odeint), seaborn, sdeint, sys, warnings
+cartopy, copy, csv, glob, itertools, math, matplotlib, netCDF4, networkx, numpy, os, PyDOE, PyPDF2, re, scipy (odeint), seaborn, sdeint, sys, warnings
 
 
 ## Licence
