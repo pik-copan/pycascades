@@ -1,6 +1,8 @@
 # pycascades
 Python framework for simulating tipping cascades on complex networks
 
+[![DOI](https://zenodo.org/badge/135442008.svg)](https://zenodo.org/badge/latestdoi/135442008)
+
 pycascades is developed at the Potsdam Institute for Climate Impact Research, Potsdam, Germany.
 
 ## Introduction
