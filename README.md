@@ -27,7 +27,7 @@ pycascades has been used in analyses supporting the following publications:
 
 ## Funding
 
-The development of pycascades has been supported by the Leibniz Association (project DominoES), the IRTG 1740/TRP 2015/50-122-0 project funded by DFG and FAPESP, the German National Academic Foundation (Studienstiftung des deutschen Volkes), and the European Research Council (ERC advanced grant project ERA, Earth Resilience in the Anthropocene, ERC-2016-ADG-743080)
+The development of pycascades has been supported by the Leibniz Association (project DominoES), the IRTG 1740/TRP 2015/50-122-0 project funded by DFG and FAPESP, the German National Academic Foundation (Studienstiftung des deutschen Volkes), and the European Research Council (ERC advanced grant project ERA, Earth Resilience in the Anthropocene, ERC-2016-ADG-743080).
 
 ## Prerequisites
 
