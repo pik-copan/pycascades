@@ -19,7 +19,7 @@ pycascades has been used in analyses supporting the following publications:
 
 2) J. Krönke, N. Wunderling, R. Winkelmann, A. Staal, B. Stumpf, O.A. Tuinenburg, J.F. Donges, 2020, [Dynamics of tipping cascades on complex networks](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.101.042311), Physical Review E, 101(4), p.042311
 
-3) N. Wunderling, J.F. Donges, J. Kurths and R. Winkelmann, [Interacting tipping elements increase risk of climate domino effects under global warming](https://esd.copernicus.org/preprints/esd-2020-18/), in review (2020).
+3) N. Wunderling, J.F. Donges, J. Kurths and R. Winkelmann, [Interacting tipping elements increase risk of climate domino effects under global warming](https://esd.copernicus.org/preprints/esd-2020-18/), Earth System Dynamics Discussions, in review (2020).
 
 4) N. Wunderling, A. Staal, B. Sakschewski, M. Hirota, O.A. Tuinenburg, J.F. Donges, H.M.J. Barbosa*, R. Winkelmann*, [Network dynamics of drought-induced tipping cascades in the Amazon rainforest](https://assets.researchsquare.com/files/rs-71039/v1/Manuscript.pdf), in review (2020), *These authors jointly supervised this study.
 
