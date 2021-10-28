@@ -1,10 +1,7 @@
+
 # Add modules directory to path
 import os
 import sys
-
-sys.path.append('')
-sys.path.append('../modules/gen')
-sys.path.append('../modules/core')
 
 # global imports
 import numpy as np
@@ -14,18 +11,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set(font_scale=1.)
 import itertools
-import time
 import glob
 from PyPDF2 import PdfFileMerger
 
 
-# private imports from sys.path
-from evolve import evolve
-
-#private imports for earth system
-from earth_sys.timing import timing
-from earth_sys.functions_earth_system import global_functions
-from earth_sys.earth import earth_system
+import pycascades as pc
 
 
 
@@ -40,7 +30,6 @@ strength = 0.25
 #drive global mean temperature (GMT) above pre-industrial
 GMT = 2.0
 #####################################################################
-
 
 ########################Declaration of variables from passed values#######################
 sys_var = np.array(sys.argv[2:], dtype=float)
@@ -64,7 +53,7 @@ pf_thc_to_amaz = sys_var[10]
 #Time scale
 print("Compute calibration timescale")
 #function call for absolute timing and time conversion
-time_props = timing()
+time_props = pc.earth_system.Timing()
 gis_time, thc_time, wais_time, amaz_time = time_props.timescales()
 conv_fac_gis = time_props.conversion()
 
@@ -76,7 +65,7 @@ mc_dir = int(sys_var[-1])
 
 ################################# MAIN #################################
 #Create Earth System
-earth_system = earth_system(gis_time, thc_time, wais_time, amaz_time,
+earth_system = pc.earth_system.Earth_System(gis_time, thc_time, wais_time, amaz_time,
                             limits_gis, limits_thc, limits_wais, limits_amaz,
                             pf_wais_to_gis, pf_thc_to_gis, pf_gis_to_thc,
                             pf_wais_to_thc, pf_gis_to_wais, pf_thc_to_wais, pf_thc_to_amaz)
@@ -113,7 +102,7 @@ for kk in plus_minus_links:
 
     # initialize state
     initial_state = [-1, -1, -1, -1]
-    ev = evolve(net, initial_state)
+    ev = pc.evolve(net, initial_state)
     # plotter.network(net)
 
     # Timestep to integration

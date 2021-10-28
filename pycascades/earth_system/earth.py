@@ -1,23 +1,35 @@
-# Add modules directory to path
-import sys
-sys.path.append('')
-sys.path.append('../../modules/core')
-sys.path.append('../../modules/gen')
-
-# global imports
 import numpy as np
 # private imports from sys.path
-from coupling import linear_coupling_earth_system
-from tipping_element import cusp
-from earth_sys.tipping_network_earth_system import tipping_network
-from earth_sys.functions_earth_system import global_functions
+from pycascades.core.coupling import coupling
+from pycascades.core.tipping_element import cusp
+from pycascades.earth_system.tipping_network_earth_system import tipping_network
+from pycascades.earth_system.functions_earth_system import global_functions
 
 """
 Here the Earth system network is defined after Kriegler et al., 2009
 """
 
+class linear_coupling_earth_system(coupling):
 
-class earth_system():
+    def __init__(self, strength, x_0):
+        coupling.__init__(self)
+        self._strength = strength
+        self._x_0 = x_0
+
+    def dxdt_cpl(self):
+        return lambda t, x_from, x_to: self._strength * (x_from - self._x_0)
+
+    def jac_cpl(self):
+        return lambda t, x_from, x_to: self._strength
+
+    def jac_diag(self):
+        return lambda t, x_from, x_to: 0
+
+    def bif_impact(self):
+        return lambda t, x_from, x_to: self._strength * (x_from - self._x_0)
+
+
+class Earth_System():
     def __init__(self, gis_time, thc_time, wais_time, amaz_time, limits_gis, limits_thc, limits_wais, limits_amaz,
                   pf_wais_to_gis, pf_thc_to_gis, pf_gis_to_thc, pf_wais_to_thc, pf_gis_to_wais, pf_thc_to_wais, pf_thc_to_amaz):
         #timescales

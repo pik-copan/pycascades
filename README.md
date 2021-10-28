@@ -5,6 +5,39 @@ Python framework for simulating tipping cascades on complex networks
 
 pycascades is developed at the Potsdam Institute for Climate Impact Research, Potsdam, Germany.
 
+## Installation
+
+Prerequisites (We use an Anaconda environment):
+
+```bash
+conda create -n pycascades python=3.9
+conda deactivate
+conda activate pycascades
+conda install -c conda-forge mamba
+mamba install -c conda-forge numpy scipy matplotlib cartopy seaborn netCDF4 networkx ipykernel
+pip install sdeint PyPDF2 pyDOE
+```
+
+Install pycascades either via:
+
+```bash
+pip install git+https://github.com/pik-copan/pycascades
+```
+
+or as development via:
+
+```bash
+git clone https://github.com/pik-copan/pycascades
+cd pycascades
+pip install -e .
+```
+
+or from PyPI (might be older version):
+
+```bash
+pip install pycascades
+```
+
 ## Introduction
 
 **Description paper:** N. Wunderling, J. Krönke, V. Wohlfarth, J. Kohler, J. Heitzig, A. Staal, S. Willner, R. Winkelmann, J.F. Donges, Modelling nonlinear dynamics of interacting tipping elements on complex networks: the PyCascades package, in review (2020).

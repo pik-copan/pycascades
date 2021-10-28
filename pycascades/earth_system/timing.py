@@ -2,21 +2,16 @@
 Timing module: This module computes the conversion factor
 between one year in the simulation and one "real" year depending on the tipping time scale of the Amazon rainforest
 """
-import sys
-sys.path.append('')
-#sys.path.append('../../modules/core')
-sys.path.append('../../modules/core')
-sys.path.append('../../modules/gen')
+
 
 import numpy as np
-from tipping_element import cusp
-from coupling import linear_coupling_earth_system
-from evolve import evolve
-from earth_sys.functions_earth_system import global_functions
-from earth_sys.tipping_network_earth_system import tipping_network
+from pycascades.core.tipping_element import cusp
+from pycascades.core.evolve import evolve
+from pycascades.earth_system.functions_earth_system import global_functions
+from pycascades.earth_system.tipping_network_earth_system import tipping_network
 
 
-class timing():
+class Timing():
 
     def __init__(self):
         #Timescales

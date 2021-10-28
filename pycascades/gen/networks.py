@@ -3,8 +3,8 @@ Some generators have to be supplied with element and coupling pools,
 which are supposed to be lists of element and coupling objects from which
 a random one is chosen for each node and edge respectively."""
 
-from core.tipping_network import tipping_network
-from core.coupling import linear_coupling
+from pycascades.core.tipping_network import tipping_network
+from pycascades.core.coupling import linear_coupling
 
 from random import choice,uniform,randint,seed
 from copy import deepcopy

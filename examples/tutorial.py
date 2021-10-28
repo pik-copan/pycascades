@@ -11,22 +11,22 @@ an evolve class, which is able to simulate the dynamics of a
 tipping network.
 """
 
-import sys
-sys.path.insert(0, "../modules")
+#import sys
+#sys.path.insert(0, "../modules")
 
 """Create two cusp tipping elements"""
-from core.tipping_element import cusp
+from pycascades.core.tipping_element import cusp
 cusp_element_0 = cusp( a = -4, b = 1, c = 0, x_0 = 0.5 )
 cusp_element_1 = cusp( a = -4, b = 1, c = 0, x_0 = 0.5 )
 
 """Create two linear couplings with strength 0.15 and 0.2"""
-from core.coupling import linear_coupling
+from pycascades.core.coupling import linear_coupling
 coupling_0 = linear_coupling( strength = 0.05 )
 coupling_1 = linear_coupling( strength = 0.2 )
 
 
 """Create a tipping network and add the created elements"""
-from core.tipping_network import tipping_network
+from pycascades.core.tipping_network import tipping_network
 
 net = tipping_network()
 
@@ -38,7 +38,7 @@ net.add_coupling( 0, 1, coupling_1 )
 net.add_coupling( 1, 0, coupling_0 )
 
 """Plot the network with the plot_network function from utils module"""
-from utils import plotter
+from pycascades.utils import plotter
 plotter.network(net).show()
 
 """Plot phaseflow and phase space of a two-element system"""
@@ -48,7 +48,7 @@ plotter.stability(net, xrange = [-0.2,1.2], yrange = [-0.2,1.2]).show()
 
 """Create an evolve module to simulate the tipping network 
 as dynamical system"""
-from core.evolve import evolve
+from pycascades.core.evolve import evolve
 initial_state = [0.1,0.9]
 ev = evolve( net, initial_state )
 
@@ -58,7 +58,7 @@ t_end = 10
 ev.integrate( timestep , t_end )
 
 """plot the temporal evolution"""
-from utils import plotter
+from pycascades.utils import plotter
 plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:] ).show()
 
 """Use the equilibrate method to end integration when an 
@@ -91,7 +91,7 @@ p=plotter.series( ev.get_timeseries()[0], ev.get_timeseries()[1][:,:]
                 , legend=True).show()
 
 """Import networks module"""
-from gen import networks
+from pycascades.gen import networks
 """Use networkx graph generator"""
 from networkx import erdos_renyi_graph
 G = erdos_renyi_graph(10, 0.25, directed = True, seed = None)
