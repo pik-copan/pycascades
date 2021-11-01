@@ -1,4 +1,4 @@
-from . import core, gen, utils, earth_system
+from . import core, gen, utils, earth_system, amazon
 
 from pycascades.core.tipping_element import cusp, hopf, realistic_cusp
 from pycascades.core.tipping_element_economic import economic_logistic

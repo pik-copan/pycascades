@@ -1,27 +1,66 @@
-import sys
-sys.path.append('../../modules/gen')
-sys.path.append('../../modules/core')
-sys.path.append('')
 
 
-from tipping_network import tipping_network
-from tipping_element import cusp
-from coupling import linear_coupling
-
-#NW - my functions
-from functions_amazon import global_functions
+from pycascades.core.tipping_network import tipping_network
+from pycascades.core.tipping_element import cusp
+from pycascades.core.coupling import linear_coupling
 
 
 from netCDF4 import Dataset
 
-
-
 import networkx as nx
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(font_scale=1.)
-sns.set_style("whitegrid")
+
+
+
+def Rain(datasets):
+    """
+    Computation of rainfall values; all datasets are necessary and a potential rain factor
+    """
+    rain = []
+    for data in datasets:
+        net_data = Dataset(data)
+        #get mean value for rainfall
+        rain_dataset = net_data.variables["rain"][:]
+        if len(rain) == 0:
+            rain = rain_dataset
+        else:
+            rain = np.add(rain, rain_dataset)
+    rain = np.array(rain)
+    return rain
+
+def Amazon_CUSPc(a, b, rain_current, rain_critical, rain_mean):
+    """
+    c = c(rainfall) where tipping occurs at sqrt((4*b**3)/(27*a))
+    """
+    c = np.sqrt((4*np.abs(b)**3) / (27*np.abs(a)))/(rain_critical - rain_mean)*(rain_current - rain_mean)
+    return c
+
+
+
+def Amazon_cpl(a, b, rain_critical, rain_current, rain_mean, delta_rain):
+    """
+    Factor of (1/2) is necessary since delta(state)=2 from -1 to +1
+    Factor (-1) is necessary since delta_rain < 0, but the coupling must be positive
+    """
+
+    #rain [c, cpl]-values
+    c = np.sqrt((4*np.abs(b)**3) / (27*np.abs(a)))/(rain_critical - rain_mean)*(rain_current - rain_mean)
+    cpl = np.sqrt((4*np.abs(b)**3) / (27*np.abs(a)))/(rain_mean - rain_critical)*(1/2)*(-1)*delta_rain
+
+
+    if cpl < 0.0:
+        raise ValueError("Coupling strengths below 0.0 are not allowed")
+        
+    return cpl
+
+
+
+def Rain_moisture_delta_only(moist_rec_val):
+    """
+    Computation of moisture recycling value for a year
+    """
+    rain_moist = - np.sum(moist_rec_val)
+    return rain_moist
 
 
 def generate_network(rain_crit, data_eval, no_cpl_dummy): 
@@ -33,7 +72,7 @@ def generate_network(rain_crit, data_eval, no_cpl_dummy):
     lat_y = net_data.variables["lat"][:]
 
     #rainfall value
-    rain = global_functions.Rain(data_eval)
+    rain = Rain(data_eval)
     rain_mean = np.nanmean(rain)
 
     for idx, val in enumerate(lon_x):
@@ -43,9 +82,9 @@ def generate_network(rain_crit, data_eval, no_cpl_dummy):
 
         a = 1
         b = 1
-        element = cusp( a = -1, b = 1, c = global_functions.Amazon_CUSPc(a, b, rain_current, rain_critical, rain_mean), x_0 = 0)
+        element = cusp( a = -1, b = 1, c = Amazon_CUSPc(a, b, rain_current, rain_critical, rain_mean), x_0 = 0)
         net.add_element(element)
-        net.node[idx]['pos'] = (val, lat_y[idx])
+        net.nodes[idx]['pos'] = (val, lat_y[idx])
 
 
     flows_xy_total = []
@@ -94,13 +133,13 @@ def generate_network(rain_crit, data_eval, no_cpl_dummy):
                 coupling_object = linear_coupling(strength = 0.0)
             else:
                 #get the difference between rainfall in the respective cell after[rain_new] and before[rain_old] tipping
-                delta_rain = global_functions.Rain_moisture_delta_only([cpl[i] for i in range(3, len(cpl))]) #delta_rain is a negative number
+                delta_rain = Rain_moisture_delta_only([cpl[i] for i in range(3, len(cpl))]) #delta_rain is a negative number
                 #current and critical values are required for the rainfall and mcwd
                 rain_current = rain[int(cpl[1])]
                 rain_critical = rain_crit
 
                 #Amount of change of MCWD is the coupling strength
-                coupling_object = linear_coupling(strength = global_functions.Amazon_cpl(a, b, rain_critical, rain_current, rain_mean, delta_rain))
+                coupling_object = linear_coupling(strength = Amazon_cpl(a, b, rain_critical, rain_current, rain_mean, delta_rain))
             net.add_coupling( int(cpl[0]), int(cpl[1]), coupling_object ) #needs to be saved as integer here
 
     print("Amazon rainforest network generated! Restriction: Only moisture recycling links above {} mm/yr are considered".format(cpl_limit))
@@ -109,3 +148,4 @@ def generate_network(rain_crit, data_eval, no_cpl_dummy):
     #print("Average degree: ", d)
     #print("Average clustering: ", average_clustering)
     return net
+
