@@ -21,13 +21,13 @@ pip install sdeint PyPDF2 pyDOE
 Install pycascades either via:
 
 ```bash
-pip install git+https://github.com/vitusbenson/pycascades
+pip install git+https://github.com/pik-copan/pycascades
 ```
 
 or as development via:
 
 ```bash
-git clone https://github.com/vitusbenson/pycascades
+git clone https://github.com/pik-copan/pycascades
 cd pycascades
 pip install -e .
 ```
