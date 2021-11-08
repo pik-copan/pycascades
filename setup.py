@@ -6,7 +6,16 @@ with open("README.md", "r") as fh:
 
 
 install_requires = [
-    "numpy"
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "cartopy",
+    "seaborn",
+    "netCDF4",
+    "networkx",
+    "ipykernel",
+    "pyDOE",
+    "PyPDF2"
 ]
 
 
