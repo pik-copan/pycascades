@@ -20,9 +20,9 @@ install_requires = [
 
 
 setup(name='pycascades', 
-        version='1.0.0',
-        url = 'wwww.pik-potsdam.de',
-        author = 'Nico Wunderling',
+        version='1.0.1',
+        url = 'https://github.com/pik-copan/pycascades',
+        author = 'Nico Wunderling, Jonathan Krönke, Vitus Benson, Dorothea Kistinger, Jan Kohler, Benedikt Stumpf, Valentin Wohlfarth, Jonathan F. Donges',
         author_email = 'nico.wunderling@pik-potsdam.de',
         long_description=long_description,
         long_description_content_type="text/markdown",
