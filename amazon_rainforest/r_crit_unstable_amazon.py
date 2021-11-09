@@ -1,11 +1,9 @@
-import time
+import sys
 import numpy as np
 import networkx as nx
 import glob
-import re
-import os
+import pycascades as pc
 
-import csv
 from netCDF4 import Dataset
 
 #plotting imports
@@ -23,26 +21,9 @@ sns.set(font_scale=2.5)
 sns.set_style("whitegrid")
 
 
-#self programmed code imports
-import sys
-sys.path.append('../modules/gen')
-sys.path.append('../modules/core')
-sys.path.append('amazon_code')
-sys.path.insert(0,"../modules")
-
-from networks import from_nxgraph
-#from gen.net_factory import from_nxgraph
-from amazon import generate_network
-from evolve import evolve, NoEquilibrium
-from tipping_element import cusp
-from coupling import linear_coupling
-
-
-
-
 #Tipping function
 def tip( net , initial_state ):
-    ev = evolve( net , initial_state )
+    ev = pc.evolve( net , initial_state )
 
     tolerance = 0.01
     t_step = 1
@@ -87,7 +68,7 @@ print(data_eval)
 ###MAIN###
 for r_crit in r_critical:
     print("r_crit: ", r_crit)
-    net = generate_network(r_crit, data_eval, no_cpl_dummy)
+    net = pc.amazon.generate_network(r_crit, data_eval, no_cpl_dummy)
 
     output = []
 
