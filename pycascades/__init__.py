@@ -1,3 +1,10 @@
+"""pycascades
+Python framework for simulating tipping cascades on complex networks.
+"""
+__version__ = "1.0.1"
+__author__ = 'Nico Wunderling, Jonathan Krönke, Vitus Benson, Dorothea Kistinger, Jan Kohler, Benedikt Stumpf, Valentin Wohlfarth, Jonathan F. Donges'
+__credits__ = 'Potsdam Institute for Climate Impact Research'
+
 from . import core, gen, utils, earth_system, amazon
 
 from pycascades.core.tipping_element import cusp, hopf, realistic_cusp
