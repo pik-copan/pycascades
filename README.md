@@ -38,6 +38,22 @@ or from PyPI (might be older version):
 pip install pycascades
 ```
 
+For using DifferentialEquations.jl solvers, please install Julia and then install also:
+
+```bash
+conda activate pycascades
+mamba install -c conda-forge numba
+pip install diffeqpy
+python
+import diffeqpy
+diffeqpy.install()
+```
+
+if this fails, be patient. Delete julia and everything in `~/.julia` and repeat the process again, maybe switching orders of a few steps.
+Note, probably Julia 1.6 does not work, try 1.5 instead. And then install manually DifferentialEquations.jl and PyCall.jl.
+PyJulia does not like anaconda. Thus need to get this https://pyjulia.readthedocs.io/en/latest/sysimage.html working.
+Also, as of now, at least on MacOS, it seems PyJulia does not like Numba, thus, better not use numba.
+
 ## Introduction
 
 **Description paper:** N. Wunderling, J. Krönke, V. Wohlfarth, J. Kohler, J. Heitzig, A. Staal, S. Willner, R. Winkelmann, J.F. Donges, [Modelling nonlinear dynamics of interacting tipping elements on complex networks: the PyCascades package](https://link.springer.com/article/10.1140/epjs/s11734-021-00155-4), The European Physical Journal Special Topics (2021).
