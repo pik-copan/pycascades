@@ -1,5 +1,5 @@
-Copyright (C) 2020, Jonathan Krönke, Nico Wunderling, Jonathan F. Donges
-and pycascades authors
+Copyright (C) 2020-2021, Potsdam-Institute for Climate Impact Research.
+Authors: Nico Wunderling, Jonathan Krönke, Vitus Benson, Dorothea Kistinger, Jan Kohler, Benedikt Stumpf, Valentin Wohlfarth, Jonathan F. Donges and pycascades authors.
 
 All rights reserved.
 
@@ -13,7 +13,7 @@ modification, are permitted provided that the following conditions are met:
       this list of conditions and the following disclaimer in the documentation
       and/or other materials provided with the distribution.
 
-    * Neither the name of pyunicorn authors and the Potsdam-Institute for
+    * Neither the name of pycascades authors and the Potsdam-Institute for
       Climate Impact Research nor the names of its contributors may be used to
       endorse or promote products derived from this software without specific
       prior written permission.
