@@ -2,6 +2,7 @@ import numpy as np
 from numba import jit
 from scipy.stats import levy_stable
 import matplotlib.pyplot as plt
+from scipy.stats.morestats import Variance
 from tqdm import tqdm
 import pandas as pd
 import seaborn as sb
@@ -25,7 +26,7 @@ def first_passage(alpha:float = 2.0, tao:float = 1700.0, gamma:float = 1.0, N: i
     #arr = levy_stable.rvs(alpha, 0.0, scale = 1/tao, size=int(1e7))#.cumsum()
     arr[0] = -1
     for i in range(1, N):
-        tmp = arr[i-1] + arr[i]/tao
+        tmp = arr[i-1] + (arr[i] - arr[i-1]**3 + arr[i-1])/tao
         if tmp < -1.0:
             arr[i] = -1.0
         elif tmp >= 0.0:
@@ -64,16 +65,16 @@ def main():
 
     df = pd.DataFrame.from_dict(outdict)
 
-    df.to_csv(f"first_passage_simple{M}.csv")
+    df.to_csv(f"first_passage_onecusp{M}.csv")
 
-    # df = pd.read_csv("first_passage_simple100.csv")
+    # df = pd.read_csv(f"first_passage_onecusp{M}.csv")
 
     for var in ["Mean", "Median"]:
         g = sb.FacetGrid(df, col="Element",  col_wrap = 2)
         g.map_dataframe(lambda data, color: sb.heatmap(data.pivot("Alpha", "Gamma", var), square=True, norm=LogNorm(vmin = 1.0, vmax = 1e7), cbar = False))
         cbar_ax = g.fig.add_axes([1.015,0.13, 0.015, 0.8])
         plt.colorbar(mpl.cm.ScalarMappable(norm=LogNorm(vmin = 1.0, vmax = 1e7), cmap = sb.color_palette("rocket", as_cmap=True)),cax=cbar_ax, label = f"{var} 1st Passage time")
-        g.fig.savefig(f"first_passage_simple_{var}.png", dpi = 200, facecolor='white', transparent=False, bbox_inches="tight")
+        g.fig.savefig(f"first_passage_onecusp_{var}.png", dpi = 200, facecolor='white', transparent=False, bbox_inches="tight")
         plt.clf()
 
 if __name__ == "__main__":
