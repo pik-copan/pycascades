@@ -7,6 +7,8 @@ import pandas as pd
 import seaborn as sb
 from matplotlib.colors import LogNorm
 import matplotlib as mpl
+#from concurrent.futures import ThreadPoolExecutor
+#from functools import partial
 
 @jit(nopython = True)
 def first_passage(alpha:float = 2.0, tao:float = 1700.0, gamma:float = 1.0, N: int = int(1e7)):
@@ -32,21 +34,24 @@ def first_passage(alpha:float = 2.0, tao:float = 1700.0, gamma:float = 1.0, N: i
             arr[i] = tmp
     return N
 
-def est_first_passage(alpha:float = 2.0, tao:float = 1700.0, gamma:float = 1.0, N: int = int(1e7), M: int = 1000):
+def est_first_passage(alpha:float = 2.0, tao:float = 1700.0, gamma:float = 1.0, N: int = int(1e7), M: int = 100):
     idxs = np.zeros(M)
     for i in tqdm(range(M)):
         idxs[i] = first_passage(alpha = alpha, tao = tao, gamma = gamma, N = N)
+    #curr_first_passage = lambda x: first_passage(alpha = alpha, tao = tao, gamma = gamma, N = N)
+    #with ThreadPoolExecutor(max_workers=4) as pool:
+        #idxs = list(tqdm(pool.map(curr_first_passage, range(M)),total = M))
     return np.mean(idxs), np.median(idxs), np.std(idxs)
 
 
 def main():
     N = int(1e7)
-    M = 1000
+    M = 100
     outdict = {"Element": [], "Tao": [], "Alpha": [], "Gamma": [], "Mean": [], "Median": [], "StdDev": []}
     for j, tao in enumerate([1865.4339212188884, 114.21024007462583, 913.6819205970066, 19.035040012437637]):
         ele = ["GIS", "THC", "WAIS", "AMAZ"][j]
-        for alpha in [0.5, 1.0, 1.5, 2.0]:#np.linspace(0.1, 2.0, 20):
-            for gamma in [0.1, 1.0, 10.0]:#[0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]:
+        for alpha in np.linspace(0.25, 2.0, 8):#np.linspace(0.1, 2.0, 20):#[0.5, 1.0, 1.5, 2.0]:#
+            for gamma in [0.1, 1.0, 10.0]:#[0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0]:#
                 print(f"First passage for tao = {tao}, alpha = {alpha}, gamma = {gamma}")
                 mean, medi, std = est_first_passage(alpha = alpha, tao = tao, gamma = gamma, N = N, M = M)
                 outdict["Element"].append(ele)
@@ -69,3 +74,6 @@ def main():
         plt.colorbar(mpl.cm.ScalarMappable(norm=LogNorm(vmin = 1.0, vmax = 1e7), cmap = sb.color_palette("rocket", as_cmap=True)),cax=cbar_ax, label = "Mean 1st Passage time")
         plt.savefig(f"first_passage_simple_{var}.png", dpi = 200, facecolor='white', transparent=False)
         plt.clf()
+
+if __name__ == "__main__":
+    main()
