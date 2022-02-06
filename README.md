@@ -14,7 +14,7 @@ conda create -n pycascades python=3.9
 conda deactivate
 conda activate pycascades
 conda install -c conda-forge mamba
-mamba install -c conda-forge numpy scipy matplotlib cartopy seaborn netCDF4 networkx ipykernel
+mamba install -c conda-forge numpy scipy matplotlib cartopy seaborn netCDF4 networkx ipykernel numba
 pip install sdeint PyPDF2 pyDOE
 ```
 
@@ -37,22 +37,6 @@ or from PyPI (might be older version):
 ```bash
 pip install pycascades
 ```
-
-For using DifferentialEquations.jl solvers, please install Julia and then install also:
-
-```bash
-conda activate pycascades
-mamba install -c conda-forge numba
-pip install diffeqpy
-python
-import diffeqpy
-diffeqpy.install()
-```
-
-if this fails, be patient. Delete julia and everything in `~/.julia` and repeat the process again, maybe switching orders of a few steps.
-Note, probably Julia 1.6 does not work, try 1.5 instead. And then install manually DifferentialEquations.jl and PyCall.jl.
-PyJulia does not like anaconda. Thus need to get this https://pyjulia.readthedocs.io/en/latest/sysimage.html working.
-Also, as of now, at least on MacOS, it seems PyJulia does not like Numba, thus, better not use numba.
 
 ## Introduction
 
