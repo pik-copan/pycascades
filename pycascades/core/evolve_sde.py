@@ -147,7 +147,11 @@ def get_params_from_es_network(net):
         in_idxs = [e[0] for e in list(net.in_edges(i))]
         for j in in_idxs:
             
-            x0 = net.get_edge_data(j,i)["data"]._x_0
+            if hasattr(net.get_edge_data(j,i)["data"], "_x_0"):
+                x0 = net.get_edge_data(j,i)["data"]._x_0
+            else:
+                x0 = 0.0
+                
             d = taos[i] * net.get_edge_data(j,i)["data"]._strength
 
             coupl[i,j] = d
@@ -163,9 +167,9 @@ class evolve():
         # Initialize solver
 
         self._all_cusp = all([n == "cusp" for n in tipping_network.get_node_types()])
-        self._all_linear_coupl_es = all([tipping_network.get_edge_data(e[0], e[1])["data"].__class__.__name__ == "linear_coupling_earth_system"  for e in tipping_network.edges])
+        self._all_linear_coupl = all([tipping_network.get_edge_data(e[0], e[1])["data"].__class__.__name__ in ["linear_coupling_earth_system", "linear_coupling"]  for e in tipping_network.edges])
 
-        if self._all_cusp and self._all_linear_coupl_es:
+        if self._all_cusp and self._all_linear_coupl:
             # get c, taos, coupl
             self._cs, self._taos, self._coupl = get_params_from_es_network(tipping_network)
 
@@ -243,7 +247,7 @@ class evolve():
         if sigmas is None:
             while self._times[-1] < t_end:
                 self._integrate_ode( t_step )
-        elif self._all_cusp and self._all_linear_coupl_es:
+        elif self._all_cusp and self._all_linear_coupl:
             if (noise == "normal") and (alphas is None):
                 alphas = [2.0 for _ in range(len(self._x))]
             elif alphas is None:
