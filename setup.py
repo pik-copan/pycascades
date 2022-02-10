@@ -15,12 +15,13 @@ install_requires = [
     "networkx",
     "ipykernel",
     "pyDOE",
-    "PyPDF2"
+    "PyPDF2",
+    "numba"
 ]
 
 
 setup(name='pycascades', 
-        version='1.0.1',
+        version='1.0.2',
         url = 'https://github.com/pik-copan/pycascades',
         author = 'Nico Wunderling, Jonathan Krönke, Vitus Benson, Dorothea Kistinger, Jan Kohler, Benedikt Stumpf, Valentin Wohlfarth, Jonathan F. Donges',
         author_email = 'nico.wunderling@pik-potsdam.de',
