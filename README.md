@@ -14,7 +14,7 @@ conda create -n pycascades python=3.9
 conda deactivate
 conda activate pycascades
 conda install -c conda-forge mamba
-mamba install -c conda-forge numpy scipy matplotlib cartopy seaborn netCDF4 networkx ipykernel
+mamba install -c conda-forge numpy scipy matplotlib cartopy seaborn netCDF4 networkx ipykernel numba
 pip install sdeint PyPDF2 pyDOE
 ```
 
