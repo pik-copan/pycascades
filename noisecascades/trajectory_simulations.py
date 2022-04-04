@@ -35,7 +35,7 @@ import pycascades as pc
 # 5. Fix simulations for fixed sigma: compute the sigma at GMT/strength == 0???
 
 
-def simulate_network_config(network_config, seed, GMT, strength, timestep = 10., t_end = 100000, sigma_as_coord = True):
+def simulate_network_config(network_config, seed, GMT, strength, alpha = None, sigma = None, timestep = 10., t_end = 100000, sigma_as_coord = True):
 
         # network_config = get_network_config(config_id)
 
@@ -51,8 +51,10 @@ def simulate_network_config(network_config, seed, GMT, strength, timestep = 10.,
 
         gis_time, thc_time, wais_time, amaz_time = 98.0*conv_fac_gis, 6.0*conv_fac_gis, 48.0*conv_fac_gis, 1.0*conv_fac_gis
 
-        sigma = network_config["sigma"]
-        alpha = network_config["alpha"]
+        if sigma is None:
+                sigma = network_config["sigma"]
+        if alpha is None:
+                alpha = network_config["alpha"]
 
         sigmas = np.array(4*[sigma])
         alphas = np.array(4*[alpha])
