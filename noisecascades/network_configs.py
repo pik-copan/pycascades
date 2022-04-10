@@ -133,7 +133,7 @@ def get_network_config(config_id = 0, strength = 0.0, GMT = 0.0, alpha = 2.0, si
     elif sigma is None:
         row = df[(df.config_id == config_id) & (df.alpha == alpha) & (df.strength == strength) & (df.GMT == GMT)].iloc[0 if alpha != 2.0 else 1]
     else:
-        row = df[(df.config_id == config_id) & (df.alpha == alpha) & (df.sigma == sigma) & (df.strength == strength) & (df.GMT == GMT)]
+        row = df[(df.config_id == config_id) & (df.alpha == alpha) & (df.sigma == sigma) & (df.strength == strength) & (df.GMT == GMT)].iloc[0]
 
     network_config = {k: ast.literal_eval(v) if k in ["limits", "couplings", "kk"] else v for k,v in row.to_dict().items()} #NETWORK_CONFIGS[config_id]
 
@@ -145,4 +145,6 @@ if __name__ == "__main__":
 
     #generate_network_configs(NETWORK_CONFIGS, GMTs = [0.0, 1.5, 3.0], strengths = [0.0, 0.5, 1.0], alphas = np.array([0.0, 0.5, 1.0, 1.5, 2.0]), sigmas = [None, 0.01, 0.1, 1.0, 10.0])
 
-    generate_network_configs(NETWORK_CONFIGS, GMTs = np.linspace(0.0, 4.0, 41), strengths = np.linspace(0.0, 1.0, 21), alphas = np.array([0.0, 0.5, 1.0, 1.5, 2.0]), sigmas = [None, 0.01, 0.1, 1.0, 10.0])
+    #generate_network_configs(NETWORK_CONFIGS, GMTs = np.linspace(0.0, 4.0, 41), strengths = np.linspace(0.0, 1.0, 21), alphas = np.array([0.0, 0.5, 1.0, 1.5, 2.0]), sigmas = [None, 0.01, 0.1, 1.0, 10.0])
+
+    generate_network_configs(NETWORK_CONFIGS, GMTs = np.linspace(0.0, 4.0, 41), strengths = np.linspace(0.0, 1.0, 21), alphas = np.array([0.0, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]), sigmas = [0.1, 0.25])
