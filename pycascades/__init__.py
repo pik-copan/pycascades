@@ -7,8 +7,6 @@ __credits__ = 'Potsdam Institute for Climate Impact Research'
 
 from . import core, gen, utils, earth_system, amazon
 
-from pycascades.core.tipping_element import cusp, hopf, realistic_cusp
-from pycascades.core.tipping_network import tipping_network
-from pycascades.core.coupling import linear_coupling, cusp_to_hopf, hopf_x_to_cusp, hopf_x_to_hopf, hopf_y_to_cusp, hopf_y_to_hopf
+from pycascades.core.coupling import linear_coupling
 from pycascades.core.evolve import evolve
 from pycascades.utils import plotter
