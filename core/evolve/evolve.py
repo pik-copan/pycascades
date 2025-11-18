@@ -1,12 +1,5 @@
-from . import semi_impl_euler_maruyama_alphastable_sde
-from . import itoint
-
 from scipy.integrate import solve_ivp
 import numpy as np
-
-
-class NoEquilibrium(Exception):
-    pass
 
 
 def integrate(
@@ -14,46 +7,24 @@ def integrate(
     initial_state,
     t_span,
     t_step,
-    backend = "solve_ivp",
+    strategy = None,
     **opts
 ):
-    match backend:
-        case "solve_ivp":
-            sol = solve_ivp(
-                lambda t, x : tipping_network.f(x, t),
-                t_span,
-                initial_state,
-                t_eval=np.arange(t_span[0], t_span[1], step=t_step),
-                events=opts.get("events", None)
-            )
-        case "itoint":
-            for opt in ["sigma", "noise"]:
-                if opt not in opts:
-                    raise Exception(f'Keyword Argument {opt} missing')
-
-            sol = itoint(
-                tipping_network.f,
-                lambda x, t: opts["sigma"],
-                initial_state,
-                t_span,
-                noise = opts["noise"]
-            )
-        case "duffing":
-            for opt in ["cs", "taos", "alphas", "sigmas", "coupl"]:
-                if opt not in opts:
-                    raise Exception(f'Keyword Argument {opt} missing')
-
-            sol = semi_impl_euler_maruyama_alphastable_sde(
-                x0 = t_span[0],
-                dt = t_step,
-                cs = opts["cs"],
-                taos = opts["taos"],
-                t_end = t_span[1],
-                alphas = opts["alphas"],
-                sigmas = opts["sigmas"],
-                coupl = opts["coupl"],
-                rng = opts.get("rng", None)
-            )
+    if strategy:
+        sol = strategy(
+            tipping_network.f,
+            t_span,
+            initial_state,
+            opts,
+        )
+    else:
+        sol = solve_ivp(
+            lambda t, x : tipping_network.f(x, t),
+            t_span,
+            initial_state,
+            t_eval=np.arange(t_span[0], t_span[1], step=t_step),
+            events=opts.get("events", None)
+        )
     return sol
 
 
