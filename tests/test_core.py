@@ -1,6 +1,6 @@
-from pycascades.core.coupling import linear_coupling
-from pycascades.core.evolve.evolve import make_equilibrium_event, integrate
-from pycascades.core.system.system import network, double_fold
+from core.evolve.evolve import make_equilibrium_event, integrate
+from core.system.system import network, double_fold
+from core.system.coupling import linear_coupling
 
 import unittest
 import numpy as np
