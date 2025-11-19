@@ -53,7 +53,11 @@ class network(system):
             i, j, val = cpl
             matrix[i, j] = val.f(t, x[j], x[i])
         diagonal = np.diag(
-            [element.f(x[idx], t) for idx, element in enumerate(self._elements)]
+            [
+                element.f(x[idx], t)
+                for idx, element
+                in enumerate(self._elements)
+            ]
         )
         matrix = matrix + diagonal
         return np.add.reduce(matrix, axis=1)

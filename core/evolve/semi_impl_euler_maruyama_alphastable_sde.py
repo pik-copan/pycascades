@@ -1,5 +1,6 @@
-import numpy as np
 from numba import jit
+from scipy.stats import levy_stable
+import numpy as np
 import warnings
 
 
@@ -38,7 +39,9 @@ def semi_impl_euler_maruyama_alphastable_sde_nb_loop(
                     ]
                 ).astype(np.complex128))
                 if (np.abs(candidates.imag) < 1e-5).sum() == 1:
-                    drift = (candidates[np.abs(candidates.imag) < 1e-5][0]).real
+                    drift = (
+                        candidates[np.abs(candidates.imag) < 1e-5][0]
+                    ).real
                 else:
                     best_idx = np.argmin(np.abs(candidates - x[j]))
                     drift = (candidates[best_idx]).real
@@ -96,7 +99,11 @@ def semi_impl_euler_maruyama_alphastable_sde(
     L = np.zeros((n, N))
     for i in range(n):
         if sigmas[i] > 0:
-            L[i,:] = sigmas[i] * (dt_scaled[i] ** (1/alphas[i])) * levy_stable.rvs(alphas[i], 0.0, size=N, random_state = rng)
+            L[i, :] = (
+                sigmas[i]
+                * (dt_scaled[i] ** (1 / alphas[i]))
+                * levy_stable.rvs(alphas[i], 0.0, size=N, random_state = rng)
+            )
     L[np.abs(L) > 1e12] = (np.sign(L) * 1e12)[np.abs(L) > 1e12]
     L[np.isinf(L)] = (np.sign(L) * 1e12)[np.isinf(L)]
     L[np.isnan(L)] = 0.0
@@ -106,6 +113,7 @@ def semi_impl_euler_maruyama_alphastable_sde(
     )
     return ts, xs, rng
 
+
 def get_params_from_es_network(net):
 
     n_nodes = net.number_of_nodes()
@@ -113,7 +121,7 @@ def get_params_from_es_network(net):
     cs = np.zeros(n_nodes)
     taos = np.zeros(n_nodes)
     coupl = np.zeros((n_nodes, n_nodes))
-    
+
     for i in range(n_nodes):
 
         node = net.nodes[i]
@@ -123,18 +131,15 @@ def get_params_from_es_network(net):
 
         in_idxs = [e[0] for e in list(net.in_edges(i))]
         for j in in_idxs:
-            
-            if hasattr(net.get_edge_data(j,i)["data"], "_x_0"):
-                x0 = net.get_edge_data(j,i)["data"]._x_0
+            if hasattr(net.get_edge_data(j, i)["data"], "_x_0"):
+                x0 = net.get_edge_data(j, i)["data"]._x_0
             else:
                 x0 = 0.0
-                
-            d = taos[i] * net.get_edge_data(j,i)["data"]._strength
 
-            coupl[i,j] = d
+            d = taos[i] * net.get_edge_data(j, i)["data"]._strength
+
+            coupl[i, j] = d
 
             cs[i] += -x0 * d
-        
 
     return cs, taos, coupl
-

@@ -1,0 +1,10 @@
+name: amazon-sos
+dependencies:
+  - python=3.11
+  - netcdf4
+  - pandas
+  - scipy
+  - networkx
+  - matplotlib
+  - pip:
+    - sdeint
