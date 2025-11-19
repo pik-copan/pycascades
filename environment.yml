@@ -1,4 +1,4 @@
-name: amazon-sos
+name: base
 dependencies:
   - python=3.11
   - netcdf4
@@ -6,5 +6,3 @@ dependencies:
   - scipy
   - networkx
   - matplotlib
-  - pip:
-    - sdeint
