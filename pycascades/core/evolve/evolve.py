@@ -31,7 +31,8 @@ def integrate(
 def make_equilibrium_event(network, tol):
     def event(t, x):
         dxdt = network.f(x, t)
-        return np.linalg.norm(dxdt) - tol
+        res = np.any(np.abs(dxdt) > tol)
+        return res
     event.terminal = True
     event.direction = 0
     return event
