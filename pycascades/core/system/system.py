@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import numpy as np
 import abc
 
@@ -33,19 +31,15 @@ class network(system):
         return np.sum([element.size() for element in self._elements])
 
     def add_element(self, element):
-        copy = deepcopy(self)
-        copy._elements.append(element)
-        return copy
+        self._elements.append(element)
 
     def add_coupling(self, from_coupling, to_coupling, coupling):
-        copy = deepcopy(self)
         if (
             self._elements[from_coupling].size() != coupling.sizes[0]
             or self._elements[to_coupling].size() != coupling.sizes[1]
         ):
             raise Exception("Coupling not possible!")
-        copy._couplings.append((from_coupling, to_coupling, coupling))
-        return copy
+        self._couplings.append((from_coupling, to_coupling, coupling))
 
     def f(self, x, t):
         matrix = np.zeros((self.size(), self.size()))
@@ -64,7 +58,7 @@ class network(system):
 
 
 class double_fold(system):
-    def __init__(self, a=-1, b=1, c=0, x_0=0.0):
+    def __init__(self, a=-1, b=1, c=lambda t: 0, x_0=0.0):
         self._par = {}
         self._par['a'] = a
         self._par['b'] = b
@@ -78,7 +72,7 @@ class double_fold(system):
         return np.array(
             self._par['a'] * pow(x - self._par['x_0'], 3)
             + self._par['b'] * (x - self._par['x_0'])
-            + self._par['c']
+            + self._par['c'].__call__(t)
         )
 
 
