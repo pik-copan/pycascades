@@ -38,10 +38,16 @@ class evolve():
         self._x = sol[1]
         self.save_state(self._t, self._x)
         
-    def integrate( self, t_step, t_end ):
-        """Manually integrate to t_end"""
+    def integrate(self, t_step, t_end):
+        if t_step > t_end:
+            raise ValueError(
+                f"Timestep of integration {t_step} must not be larger than"
+                f"end time of integration {t_end}"
+            )
         while self._times[-1] < t_end:
-            self._integrate( t_step )
+            if self._times[-1] + t_step > t_end:
+                t_step = t_end - self._times[-1]
+            self._integrate(t_step)
     
     def equilibrate( self, tol , t_step, t_break=None ):
         """Iterate system until it is in equilibrium. 
@@ -56,7 +62,7 @@ class evolve():
                         "in " + str(t_break) + " seconds." \
                         " Increase tolerance or breaktime."
                         )
-   
+
     def is_equilibrium( self, tol ):
         """Check if the system is in an equilibrium state, e.g. if the 
         absolute value of all elements of f_prime is less than tolerance. 
