@@ -1,0 +1,8 @@
+name: base
+dependencies:
+  - python=3.11
+  - netcdf4
+  - pandas
+  - scipy
+  - networkx
+  - matplotlib

@@ -3,54 +3,53 @@ Some generators have to be supplied with element and coupling pools,
 which are supposed to be lists of element and coupling objects from which
 a random one is chosen for each node and edge respectively."""
 
-from pycascades.core.tipping_network import tipping_network
-from pycascades.core.coupling import linear_coupling
+from pycascades.core.system.system import network
+from pycascades.core.system.coupling import linear_coupling
 
-from random import choice,uniform,randint,seed
+from random import choice, uniform, randint, seed
 from copy import deepcopy
 import networkx as nx
-from math import sqrt,exp,ceil
+from math import sqrt, exp, ceil
 import numpy as np
 
-def from_nxgraph( G, element_pool, coupling_pool, coupling=None, sd=None):
+
+def from_nxgraph(G, element_pool, coupling_pool, coupling=None, sd=None):
 
     if not nx.is_directed(G):
         raise ValueError("Only directed graphs supported!")
 
     couplings = []
     if coupling == 'uniform':
-        seed_list=np.random.randint(0,100*G.number_of_edges(),
-                                    size=G.number_of_edges())
+        seed_list = np.random.randint(
+            0,
+            100 * G.number_of_edges(),
+            size=G.number_of_edges()
+        )
         for ind in range(G.number_of_edges()):
             seed(seed_list[ind])
-            strength = uniform(coupling_pool[0],coupling_pool[1])
-            couplings.append( linear_coupling( strength ) )
+            strength = uniform(coupling_pool[0], coupling_pool[1])
+            couplings.append(linear_coupling(strength))
     else:
         for ind in range(G.number_of_edges()):
-            couplings.append( choice(coupling_pool) )
+            couplings.append(choice(coupling_pool))
 
+    net = network()
 
-    net = tipping_network()
+    for node, element in zip(G.nodes(), element_pool):
+        net.add_element(element)
 
-    for node in G.nodes():
-        net.add_element(choice(element_pool))
-
-    for ind, edge in enumerate(G.edges()):
-        net.add_coupling( edge[0], edge[1], couplings[ind] )
+    for edge, cpl in zip(G.edges(), coupling_pool):
+        net.add_coupling(edge[1], edge[0], cpl)
 
     return net
 
-def complete_graph( number, element_pool, coupling_pool):
-    G = nx.complete_graph(number, nx.DiGraph())
-    net = from_nxgraph(G, element_pool, coupling_pool)
-    return net
 
 def directed_watts_strogatz_graph(n, degree, beta, element_pool, coupling_pool,
                                   sd=None):
     k = ceil(degree/2)*2
     if k > n:
         raise nx.NetworkXError("k>n, choose smaller k or larger n")
-    
+
     #If k == n, the graph is complete not Watts-Strogatz
     if k == n:
         return nx.complete_graph(n)
